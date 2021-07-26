@@ -22,7 +22,7 @@ SaveButton::SaveButton(Point position, Point size) :
 	triedThumbnail(false),
 	isMouseInsideAuthor(false),
 	isMouseInsideHistory(false),
-	showVotes(false),
+	showVotes(true),
 	thumbnailRenderer(nullptr),
 	isButtonDown(false),
 	isMouseInside(false),
@@ -237,7 +237,12 @@ void SaveButton::Draw(const Point& screenPos)
 		{
 			int x = screenPos.X-7+(Size.X-thumbBoxSize.X)/2+thumbBoxSize.X-Graphics::textwidth(votesBackground);
 			int y = screenPos.Y-23+(Size.Y-thumbBoxSize.Y)/2+thumbBoxSize.Y;
-			g->drawtext(x, y, votesBackground, 16, 72, 16, 255);
+
+			if (save->votesUp > save->votesDown) //Red / green colors for vote counter
+				g->drawtext(x, y, votesBackground, 16, 72, 16, 255);
+			else
+				g->drawtext(x, y, votesBackground, 163, 27, 27, 255);
+			
 			g->drawtext(x, y, votesBackground2, 192, 192, 192, 255);
 			g->drawtext(x+3, y, votesString, 255, 255, 255, 255);
 		}

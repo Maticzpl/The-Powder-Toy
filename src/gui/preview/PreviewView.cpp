@@ -441,7 +441,11 @@ void PreviewView::NotifySaveChanged(PreviewModel * sender)
 			userIsAuthor = true;
 		else
 			userIsAuthor = false;
-		viewsLabel->SetText(String::Build("\bgViews:\bw ", save->Views));
+
+		// \x0F waits for next 3 characters which are converted to R G B
+		// \x is just hexadecimal (and it ignores following 0 and alone 0)
+		viewsLabel->SetText(String::Build("\bgViews:\bw ", save->Views,"\n\bgVotes:\x0F\x7\xFF\x7 ",save->votesUp,"\bg/\x0F\xFF\x7\x7",save->votesDown));
+		
 		saveDescriptionLabel->SetText(save->Description);
 		if(save->Favourite)
 		{
