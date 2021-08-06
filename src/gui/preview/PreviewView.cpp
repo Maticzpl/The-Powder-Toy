@@ -639,6 +639,51 @@ void PreviewView::NotifyCommentsChanged(PreviewModel * sender)
 			tempComment->Appearance.HorizontalAlign = ui::Appearance::AlignLeft;
 			tempComment->Appearance.VerticalAlign = ui::Appearance::AlignTop;
 			tempComment->SetTextColour(ui::Colour(180, 180, 180));
+
+			
+			//Color mentions of other people
+			for (size_t i = 0; i < comments->size(); i++)
+			{
+				String username = comments->at(i)->authorName.FromUtf8();
+
+				if (tempComment->GetText().Contains(username))
+				{
+					int prev = 0;
+					while ((true))
+					{
+						String colored = tempComment->GetText().Substr(prev);
+						int start = colored.find(username);
+						int end = username.length() + start + 4;//+4 cause colors take up 4 characters
+						
+						colored.Insert(start, "\x0F\x8c\xff\x69");	//green
+						colored.Insert(end, "\x0F\xB4\xB4\xB4");		//Same color as tempComment->SetTextColour(ui::Colour(180, 180, 180));
+
+						tempComment->SetText(String::Build(tempComment->GetText().Substr(0, prev), colored));
+						if (!colored.Substr(end).Contains(username))
+							break;
+
+						prev = end;
+					}
+				}
+			}
+			//Colour mentions of user
+			if (Client::Ref().GetAuthUser().UserID)
+			{
+				String username = Client::Ref().GetAuthUser().Username.FromUtf8();
+
+				if (tempComment->GetText().Contains(username))
+				{
+					String colored = tempComment->GetText();
+					int start = colored.find(username);
+					int end = username.length() + start + 4;//+4 cause colors take up 4 characters
+					
+					colored.Insert(start, "\x0F\xff\xe4\x66");		//Bright Yellow 
+					colored.Insert(end, "\x0F\xB4\xB4\xB4");
+					
+					tempComment->SetText(colored);
+				}
+			}
+			
 			currentY += tempComment->Size.Y+4;
 
 			commentComponents.push_back(tempComment);
