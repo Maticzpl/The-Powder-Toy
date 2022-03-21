@@ -6,7 +6,7 @@ void Element::Element_CONV()
 {
 	Identifier = "DEFAULT_PT_CONV";
 	Name = "CONV";
-	Colour = PIXPACK(0x0AAB0A);
+	Colour = 0x0AAB0A;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_CONV()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Converter. Converts everything into whatever it first touches.";
 
 	Properties = TYPE_SOLID | PROP_NOCTYPEDRAW;
 

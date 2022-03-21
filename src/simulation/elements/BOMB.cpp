@@ -7,7 +7,7 @@ void Element::Element_BOMB()
 {
 	Identifier = "DEFAULT_PT_BOMB";
 	Name = "BOMB";
-	Colour = PIXPACK(0xFFF288);
+	Colour = 0xFFF288;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_BOMB()
 
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
-	Description = "Bomb. Explodes and destroys all surrounding particles when it touches something.";
 
 	Properties = TYPE_PART|PROP_SPARKSETTLE;
 

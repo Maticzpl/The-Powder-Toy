@@ -6,7 +6,7 @@ void Element::Element_DTEC()
 {
 	Identifier = "DEFAULT_PT_DTEC";
 	Name = "DTEC";
-	Colour = PIXPACK(0xFD9D18);
+	Colour = 0xFD9D18;
 	MenuVisible = 1;
 	MenuSection = SC_SENSOR;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_DTEC()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "Detector, creates a spark when something with its ctype is nearby.";
 
 	Properties = TYPE_SOLID;
 

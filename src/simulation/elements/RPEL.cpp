@@ -6,7 +6,7 @@ void Element::Element_RPEL()
 {
 	Identifier = "DEFAULT_PT_RPEL";
 	Name = "RPEL";
-	Colour = PIXPACK(0x99CC00);
+	Colour = 0x99CC00;
 	MenuVisible = 1;
 	MenuSection = SC_FORCE;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_RPEL()
 
 	DefaultProperties.temp = 20.0f + 273.15f;
 	HeatConduct = 0;
-	Description = "Repels or attracts particles based on its temperature.";
 
 	Properties = TYPE_SOLID;
 

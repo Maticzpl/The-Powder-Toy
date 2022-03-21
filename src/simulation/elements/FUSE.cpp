@@ -6,7 +6,7 @@ void Element::Element_FUSE()
 {
 	Identifier = "DEFAULT_PT_FUSE";
 	Name = "FUSE";
-	Colour = PIXPACK(0x0A5706);
+	Colour = 0x0A5706;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_FUSE()
 	Weight = 100;
 
 	HeatConduct = 200;
-	Description = "Burns slowly. Ignites at somewhat high temperatures or with electricity.";
 
 	Properties = TYPE_SOLID;
 

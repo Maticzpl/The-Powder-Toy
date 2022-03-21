@@ -2,15 +2,15 @@ simulation_files = files(
 	'Air.cpp',
 	'Element.cpp',
 	'ElementClasses.cpp',
+	'GameSave.cpp',
 	'GOLString.cpp',
 	'Gravity.cpp',
 	'Particle.cpp',
-	'SaveRenderer.cpp',
 	'Sign.cpp',
-	'SimTool.cpp',
 	'SimulationData.cpp',
 	'ToolClasses.cpp',
 	'Simulation.cpp',
+	'SimTool.cpp',
 	'SnapshotDelta.cpp',
 )
 

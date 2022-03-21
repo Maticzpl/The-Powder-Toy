@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "simulation/ElementCommon.h"
+#include "gui/Point.h"
 
 static void initDeltaPos();
 static void changeType(ELEMENT_CHANGETYPE_FUNC_ARGS);
@@ -8,7 +9,7 @@ void Element::Element_ETRD()
 {
 	Identifier = "DEFAULT_PT_ETRD";
 	Name = "ETRD";
-	Colour = PIXPACK(0x404040);
+	Colour = 0x404040;
 	MenuVisible = 1;
 	MenuSection = SC_ELEC;
 	Enabled = 1;
@@ -31,7 +32,6 @@ void Element::Element_ETRD()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Electrode. Creates a surface that allows Plasma arcs. (Use sparingly)";
 
 	Properties = TYPE_SOLID|PROP_CONDUCTS|PROP_LIFE_DEC;
 
@@ -63,14 +63,14 @@ static void changeType(ELEMENT_CHANGETYPE_FUNC_ARGS)
 class ETRD_deltaWithLength
 {
 public:
-	ETRD_deltaWithLength(ui::Point a, int b):
+	ETRD_deltaWithLength(gui::Point a, int b):
 		d(a),
 		length(b)
 	{
 
 	}
 
-	ui::Point d;
+	gui::Point d;
 	int length;
 };
 
@@ -83,9 +83,9 @@ static void initDeltaPos()
 	for (int ry = -maxLength; ry <= maxLength; ry++)
 		for (int rx = -maxLength; rx <= maxLength; rx++)
 		{
-			ui::Point d(rx, ry);
-			if (std::abs(d.X) + std::abs(d.Y) <= maxLength)
-				deltaPos.push_back(ETRD_deltaWithLength(d, std::abs(d.X) + std::abs(d.Y)));
+			gui::Point d{ rx, ry };
+			if (std::abs(d.x) + std::abs(d.y) <= maxLength)
+				deltaPos.push_back(ETRD_deltaWithLength(d, std::abs(d.x) + std::abs(d.y)));
 		}
 	std::stable_sort(deltaPos.begin(), deltaPos.end(), [](const ETRD_deltaWithLength &a, const ETRD_deltaWithLength &b) {
 		return a.length < b.length;
@@ -102,7 +102,7 @@ int Element_ETRD_nearestSparkablePart(Simulation *sim, int targetId)
 	Particle *parts = sim->parts;
 	int foundDistance = XRES + YRES;
 	int foundI = -1;
-	ui::Point targetPos = ui::Point(int(parts[targetId].x), int(parts[targetId].y));
+	gui::Point targetPos = { int(parts[targetId].x), int(parts[targetId].y) };
 
 	if (sim->etrd_count_valid)
 	{
@@ -116,16 +116,16 @@ int Element_ETRD_nearestSparkablePart(Simulation *sim, int targetId)
 			for (std::vector<ETRD_deltaWithLength>::iterator iter = deltaPos.begin(), end = deltaPos.end(); iter != end; ++iter)
 			{
 				ETRD_deltaWithLength delta = (*iter);
-				ui::Point checkPos = targetPos + delta.d;
+				gui::Point checkPos = targetPos + delta.d;
 				int checkDistance = delta.length;
 				if (foundDistance < checkDistance)
 				{
 					// deltaPos is sorted in order of ascending length, so foundDistance < checkDistance means all later items are further away.
 					break;
 				}
-				if (sim->InBounds(checkPos.X, checkPos.Y) && checkDistance <= foundDistance)
+				if (sim->InBounds(checkPos.x, checkPos.y) && checkDistance <= foundDistance)
 				{
-					int r = sim->pmap[checkPos.Y][checkPos.X];
+					int r = sim->pmap[checkPos.y][checkPos.x];
 					if (r && TYP(r) == PT_ETRD && !parts[ID(r)].life && ID(r) != targetId && checkDistance < foundDistance)
 					{
 						foundDistance = checkDistance;
@@ -141,8 +141,8 @@ int Element_ETRD_nearestSparkablePart(Simulation *sim, int targetId)
 			{
 				if (parts[i].type == PT_ETRD && !parts[i].life)
 				{
-					ui::Point checkPos = ui::Point(int(parts[i].x)-targetPos.X, int(parts[i].y)-targetPos.Y);
-					int checkDistance = std::abs(checkPos.X) + std::abs(checkPos.Y);
+					gui::Point checkPos = { int(parts[i].x)-targetPos.x, int(parts[i].y)-targetPos.y };
+					int checkDistance = std::abs(checkPos.x) + std::abs(checkPos.y);
 					if (checkDistance < foundDistance && i != targetId)
 					{
 						foundDistance = checkDistance;
@@ -161,8 +161,8 @@ int Element_ETRD_nearestSparkablePart(Simulation *sim, int targetId)
 			if (parts[i].type == PT_ETRD && !parts[i].life)
 			{
 				countLife0++;
-				ui::Point checkPos = ui::Point(int(parts[i].x)-targetPos.X, int(parts[i].y)-targetPos.Y);
-				int checkDistance = std::abs(checkPos.X) + std::abs(checkPos.Y);
+				gui::Point checkPos = { int(parts[i].x)-targetPos.x, int(parts[i].y)-targetPos.y };
+				int checkDistance = std::abs(checkPos.x) + std::abs(checkPos.y);
 				if (checkDistance < foundDistance && i != targetId)
 				{
 					foundDistance = checkDistance;

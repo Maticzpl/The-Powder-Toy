@@ -1,12 +1,10 @@
 #include "simulation/ElementCommon.h"
 
-static VideoBuffer *iconGen(int wallID, int width, int height);
-
 void Element::Element_NONE()
 {
 	Identifier = "DEFAULT_PT_NONE";
 	Name = "NONE";
-	Colour = PIXPACK(0x000000);
+	Colour = 0x000000;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -29,7 +27,6 @@ void Element::Element_NONE()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "Erases particles.";
 
 	Properties = 0;
 
@@ -41,21 +38,4 @@ void Element::Element_NONE()
 	LowTemperatureTransition = NT;
 	HighTemperature = ITH;
 	HighTemperatureTransition = NT;
-
-	IconGenerator = &iconGen;
-}
-
-static VideoBuffer *iconGen(int wallID, int width, int height)
-{
-	VideoBuffer * newTexture = new VideoBuffer(width, height);
-
-	for (int j=3; j<(width-4)/2; j++)
-	{
-		newTexture->SetPixel(j+6, j, 0xFF, 0, 0, 255);
-		newTexture->SetPixel(j+7, j, 0xFF, 0, 0, 255);
-		newTexture->SetPixel(-j+19, j, 0xFF, 0, 0, 255);
-		newTexture->SetPixel(-j+20, j, 0xFF, 0, 0, 255);
-	}
-
-	return newTexture;
 }

@@ -1,4 +1,5 @@
 #include "simulation/ElementCommon.h"
+#include "graphics/SimulationRenderer.h"
 
 static int update(UPDATE_FUNC_ARGS);
 static int graphics(GRAPHICS_FUNC_ARGS);
@@ -7,7 +8,7 @@ void Element::Element_LCRY()
 {
 	Identifier = "DEFAULT_PT_LCRY";
 	Name = "LCRY";
-	Colour = PIXPACK(0x505050);
+	Colour = 0x505050;
 	MenuVisible = 1;
 	MenuSection = SC_POWERED;
 	Enabled = 1;
@@ -30,7 +31,6 @@ void Element::Element_LCRY()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Liquid Crystal. Changes colour when charged. (PSCN Charges, NSCN Discharges)";
 
 	Properties = TYPE_SOLID;
 
@@ -103,9 +103,9 @@ static int update(UPDATE_FUNC_ARGS)
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
 	bool deco = false;
-	if (ren->decorations_enable && cpart->dcolour && (cpart->dcolour&0xFF000000))
+	if (ren->DecorationsEnabled() && cpart->dcolour && (cpart->dcolour&0xFF000000))
 	{
-		if (!ren->blackDecorations) // if blackDecorations is off, always show deco
+		if (!ren->BlackDecorations()) // if blackDecorations is off, always show deco
 			deco = true;
 		else if(((cpart->dcolour>>24)&0xFF) >= 250 && ((cpart->dcolour>>16)&0xFF) <= 5 && ((cpart->dcolour>>8)&0xFF) <= 5 && ((cpart->dcolour)&0xFF) <= 5) // else only render black deco
 			deco = true;

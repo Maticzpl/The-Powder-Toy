@@ -4,7 +4,7 @@ void Element::Element_GAS()
 {
 	Identifier = "DEFAULT_PT_GAS";
 	Name = "GAS";
-	Colour = PIXPACK(0xE0FF20);
+	Colour = 0xE0FF20;
 	MenuVisible = 1;
 	MenuSection = SC_GAS;
 	Enabled = 1;
@@ -28,7 +28,6 @@ void Element::Element_GAS()
 
 	DefaultProperties.temp = R_TEMP + 2.0f + 273.15f;
 	HeatConduct = 42;
-	Description = "Diffuses quickly and is flammable. Liquefies into OIL under pressure.";
 
 	Properties = TYPE_GAS | PROP_NEUTPASS;
 

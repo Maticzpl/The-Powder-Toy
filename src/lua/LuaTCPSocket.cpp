@@ -17,7 +17,10 @@
 # include <time.h>
 #endif
 
-void SetupCurlEasyCiphers(CURL *easy);
+namespace network
+{
+	void SetupCurlEasyCiphers(CURL *easy);
+}
 
 namespace LuaTCPSocket
 {
@@ -461,13 +464,12 @@ namespace LuaTCPSocket
 				curl_easy_setopt(tcps->easy, CURLOPT_CONNECT_ONLY, 1L);
 				ByteString address = luaL_checkstring(l, 2);
 				curl_easy_setopt(tcps->easy, CURLOPT_PORT, long(luaL_checkinteger(l, 3)));
-				curl_easy_setopt(tcps->easy, CURLOPT_NOSIGNAL, 1L);
 				curl_easy_setopt(tcps->easy, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 				if (lua_toboolean(l, 4))
 				{
 					curl_easy_setopt(tcps->easy, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
 					curl_easy_setopt(tcps->easy, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
-					SetupCurlEasyCiphers(tcps->easy);
+					network::SetupCurlEasyCiphers(tcps->easy);
 					address = "https://" + address;
 				}
 				else

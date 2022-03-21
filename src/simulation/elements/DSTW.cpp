@@ -6,7 +6,7 @@ void Element::Element_DSTW()
 {
 	Identifier = "DEFAULT_PT_DSTW";
 	Name = "DSTW";
-	Colour = PIXPACK(0x1020C0);
+	Colour = 0x1020C0;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_DSTW()
 
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 23;
-	Description = "Distilled water, does not conduct electricity.";
 
 	Properties = TYPE_LIQUID|PROP_NEUTPASS;
 

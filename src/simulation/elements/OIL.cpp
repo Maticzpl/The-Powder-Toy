@@ -4,7 +4,7 @@ void Element::Element_OIL()
 {
 	Identifier = "DEFAULT_PT_OIL";
 	Name = "OIL";
-	Colour = PIXPACK(0x404010);
+	Colour = 0x404010;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -27,7 +27,6 @@ void Element::Element_OIL()
 	Weight = 20;
 
 	HeatConduct = 42;
-	Description = "Flammable, turns into GAS at low pressure or high temperature. Can be formed with NEUT and NITR.";
 
 	Properties = TYPE_LIQUID | PROP_NEUTPASS;
 

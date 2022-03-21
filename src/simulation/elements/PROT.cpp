@@ -9,7 +9,7 @@ void Element::Element_PROT()
 {
 	Identifier = "DEFAULT_PT_PROT";
 	Name = "PROT";
-	Colour = PIXPACK(0x990000);
+	Colour = 0x990000;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -32,7 +32,6 @@ void Element::Element_PROT()
 	Weight = -1;
 
 	HeatConduct = 61;
-	Description = "Protons. Transfer heat to materials, and removes sparks.";
 
 	Properties = TYPE_ENERGY;
 

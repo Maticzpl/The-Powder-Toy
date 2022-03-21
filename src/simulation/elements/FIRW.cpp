@@ -1,5 +1,6 @@
 #include "simulation/ElementCommon.h"
-#include "hmap.h"
+#include "graphics/SimulationRenderer.h"
+#include "graphics/Pix.h"
 
 static int update(UPDATE_FUNC_ARGS);
 static int graphics(GRAPHICS_FUNC_ARGS);
@@ -8,7 +9,7 @@ void Element::Element_FIRW()
 {
 	Identifier = "DEFAULT_PT_FIRW";
 	Name = "FIRW";
-	Colour = PIXPACK(0xFFA040);
+	Colour = 0xFFA040;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -31,7 +32,6 @@ void Element::Element_FIRW()
 	Weight = 55;
 
 	HeatConduct = 70;
-	Description = "Fireworks! Colorful, set off by fire.";
 
 	Properties = TYPE_PART|PROP_LIFE_DEC;
 
@@ -89,9 +89,8 @@ static int update(UPDATE_FUNC_ARGS)
 	else //if (parts[i].tmp>=2)
 	{
 		float angle, magnitude;
-		int caddress = RNG::Ref().between(0, 199) * 3;
 		int n;
-		unsigned col = (((firw_data[caddress]))<<16) | (((firw_data[caddress+1]))<<8) | ((firw_data[caddress+2]));
+		auto col = SimulationRenderer::FirwTable()[RNG::Ref().between(0, 199)];
 		for (n=0; n<40; n++)
 		{
 			np = sim->create_part(-3, x, y, PT_EMBR);

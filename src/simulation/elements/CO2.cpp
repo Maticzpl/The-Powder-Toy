@@ -6,7 +6,7 @@ void Element::Element_CO2()
 {
 	Identifier = "DEFAULT_PT_CO2";
 	Name = "CO2";
-	Colour = PIXPACK(0x666666);
+	Colour = 0x666666;
 	MenuVisible = 1;
 	MenuSection = SC_GAS;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_CO2()
 	Weight = 1;
 
 	HeatConduct = 88;
-	Description = "Carbon Dioxide. Heavy gas, drifts downwards. Carbonates water and turns to dry ice when cold.";
 
 	Properties = TYPE_GAS;
 

@@ -8,7 +8,7 @@ void Element::Element_CLST()
 {
 	Identifier = "DEFAULT_PT_CLST";
 	Name = "CLST";
-	Colour = PIXPACK(0xE4A4A4);
+	Colour = 0xE4A4A4;
 	MenuVisible = 1;
 	MenuSection = SC_POWDERS;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_CLST()
 	Weight = 55;
 
 	HeatConduct = 70;
-	Description = "Clay dust. Produces paste when mixed with water.";
 
 	Properties = TYPE_PART;
 

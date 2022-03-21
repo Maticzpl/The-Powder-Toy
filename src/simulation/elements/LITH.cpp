@@ -1,4 +1,5 @@
 #include "simulation/ElementCommon.h"
+#include "graphics/Pix.h"
 
 static int update(UPDATE_FUNC_ARGS);
 static int graphics(GRAPHICS_FUNC_ARGS);
@@ -7,7 +8,7 @@ void Element::Element_LITH()
 {
 	Identifier = "DEFAULT_PT_LITH";
 	Name = "LITH";
-	Colour = PIXPACK(0xB6AABF);
+	Colour = 0xB6AABF;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -30,7 +31,6 @@ void Element::Element_LITH()
 	Weight = 17;
 
 	HeatConduct = 70;
-	Description = "Lithium. Reactive element that explodes on contact with water.";
 
 	Properties = TYPE_PART | PROP_LIFE_DEC;
 
@@ -241,9 +241,9 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 	if (cpart->life >= 1000)
 	{
 		int colour = 0xFFA040;
-		*colr = PIXR(colour);
-		*colg = PIXG(colour);
-		*colb = PIXB(colour);
+		*colr = PixR(colour);
+		*colg = PixG(colour);
+		*colb = PixB(colour);
 		*pixel_mode |= PMODE_FLARE | PMODE_GLOW;
 	}
 	// Charged lith

@@ -7,7 +7,7 @@ void Element::Element_DCEL()
 {
 	Identifier = "DEFAULT_PT_DCEL";
 	Name = "DCEL";
-	Colour = PIXPACK(0x99CC00);
+	Colour = 0x99CC00;
 	MenuVisible = 1;
 	MenuSection = SC_FORCE;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_DCEL()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Decelerator, slows down nearby elements.";
 
 	Properties = TYPE_SOLID;
 

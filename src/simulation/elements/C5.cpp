@@ -7,7 +7,7 @@ void Element::Element_C5()
 {
 	Identifier = "DEFAULT_PT_C5";
 	Name = "C-5";
-	Colour = PIXPACK(0x2050E0);
+	Colour = 0x2050E0;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_C5()
 	Weight = 100;
 
 	HeatConduct = 88;
-	Description = "Cold explosive, set off by anything cold.";
 
 	Properties = TYPE_SOLID | PROP_NEUTPENETRATE | PROP_LIFE_DEC;
 

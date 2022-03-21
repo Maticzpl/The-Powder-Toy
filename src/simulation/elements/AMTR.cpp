@@ -7,7 +7,7 @@ void Element::Element_AMTR()
 {
 	Identifier = "DEFAULT_PT_AMTR";
 	Name = "AMTR";
-	Colour = PIXPACK(0x808080);
+	Colour = 0x808080;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_AMTR()
 	Weight = 100;
 
 	HeatConduct = 70;
-	Description = "Anti-Matter, destroys a majority of particles.";
 
 	Properties = TYPE_GAS;
 

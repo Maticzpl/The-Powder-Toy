@@ -9,7 +9,7 @@ void Element::Element_PHOT()
 {
 	Identifier = "DEFAULT_PT_PHOT";
 	Name = "PHOT";
-	Colour = PIXPACK(0xFFFFFF);
+	Colour = 0xFFFFFF;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -33,7 +33,6 @@ void Element::Element_PHOT()
 
 	DefaultProperties.temp = R_TEMP + 900.0f + 273.15f;
 	HeatConduct = 251;
-	Description = "Photons. Refracts through glass, scattered by quartz, and color-changed by different elements. Ignites flammable materials.";
 
 	Properties = TYPE_ENERGY|PROP_LIFE_DEC|PROP_LIFE_KILL_DEC;
 
@@ -150,7 +149,7 @@ static void create(ELEMENT_CREATE_FUNC_ARGS)
 	float a = RNG::Ref().between(0, 7) * 0.78540f;
 	sim->parts[i].vx = 3.0f * cosf(a);
 	sim->parts[i].vy = 3.0f * sinf(a);
-	int Element_FILT_interactWavelengths(Particle* cpart, int origWl);
+	int Element_FILT_interactWavelengths(const Particle *cpart, int origWl);
 	if (TYP(sim->pmap[y][x]) == PT_FILT)
 		sim->parts[i].ctype = Element_FILT_interactWavelengths(&sim->parts[ID(sim->pmap[y][x])], sim->parts[i].ctype);
 }

@@ -6,7 +6,7 @@ void Element::Element_MERC()
 {
 	Identifier = "DEFAULT_PT_MERC";
 	Name = "MERC";
-	Colour = PIXPACK(0x736B6D);
+	Colour = 0x736B6D;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_MERC()
 	Weight = 91;
 
 	HeatConduct = 251;
-	Description = "Mercury. Volume changes with temperature, Conductive.";
 
 	Properties = TYPE_LIQUID|PROP_CONDUCTS|PROP_NEUTABSORB|PROP_LIFE_DEC;
 

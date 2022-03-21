@@ -7,7 +7,7 @@ void Element::Element_SWCH()
 {
 	Identifier = "DEFAULT_PT_SWCH";
 	Name = "SWCH";
-	Colour = PIXPACK(0x103B11);
+	Colour = 0x103B11;
 	MenuVisible = 1;
 	MenuSection = SC_ELEC;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_SWCH()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Only conducts when switched on. (PSCN switches on, NSCN switches off)";
 
 	Properties = TYPE_SOLID;
 

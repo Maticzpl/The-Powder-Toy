@@ -6,7 +6,7 @@ void Element::Element_VSNS()
 {
 	Identifier = "DEFAULT_PT_VSNS";
 	Name = "VSNS";
-	Colour = PIXPACK(0x7C9C00);
+	Colour = 0x7C9C00;
 	MenuVisible = 1;
 	MenuSection = SC_SENSOR;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_VSNS()
 
 	DefaultProperties.temp = 4.0f + 273.15f;
 	HeatConduct = 0;
-	Description = "Velocity sensor, creates a spark when there's a nearby particle with velocity higher than its temperature.";
 
 	Properties = TYPE_SOLID;
 

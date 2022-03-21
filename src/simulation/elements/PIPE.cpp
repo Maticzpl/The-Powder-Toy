@@ -1,4 +1,6 @@
 #include "simulation/ElementCommon.h"
+#include "graphics/SimulationRenderer.h"
+#include "graphics/Pix.h"
 //Temp particle used for graphics
 Particle tpart;
 
@@ -14,7 +16,7 @@ void Element::Element_PIPE()
 {
 	Identifier = "DEFAULT_PT_PIPE";
 	Name = "PIPE";
-	Colour = PIXPACK(0x444444);
+	Colour = 0x444444;
 	MenuVisible = 1;
 	MenuSection = SC_FORCE;
 	Enabled = 1;
@@ -38,7 +40,6 @@ void Element::Element_PIPE()
 
 	DefaultProperties.temp = 273.15f;
 	HeatConduct = 0;
-	Description = "PIPE, moves particles around. Once the BRCK generates, erase some for the exit. Then the PIPE generates and is usable.";
 
 	Properties = TYPE_SOLID|PROP_LIFE_DEC;
 
@@ -83,39 +84,6 @@ constexpr int PPIP_TMPFLAG_TRIGGERS        = 0x1C000000;
 
 signed char pos_1_rx[] = { -1,-1,-1, 0, 0, 1, 1, 1 };
 signed char pos_1_ry[] = { -1, 0, 1,-1, 1,-1, 0, 1 };
-
-static void transformPatch(Particle &part, const int (&patch)[8])
-{
-	if (part.tmp & 0x00000200) part.tmp = (part.tmp & 0xFFFFE3FF) | (patch[(part.tmp & 0x00001C00) >> 10] << 10);
-	if (part.tmp & 0x00002000) part.tmp = (part.tmp & 0xFFFE3FFF) | (patch[(part.tmp & 0x0001C000) >> 14] << 14);
-}
-
-void Element_PIPE_patchR(Particle &part)
-{
-	// 035 -> 210
-	// 1 6 -> 4 3
-	// 247 -> 765
-	const int patchR[] = { 2, 4, 7, 1, 6, 0, 3, 5 };
-	transformPatch(part, patchR);
-}
-
-void Element_PIPE_patchH(Particle &part)
-{
-	// 035 -> 530
-	// 1 6 -> 6 1
-	// 247 -> 742
-	const int patchH[] = { 5, 6, 7, 3, 4, 0, 1, 2 };
-	transformPatch(part, patchH);
-}
-
-void Element_PIPE_patchV(Particle &part)
-{
-	// 035 -> 247
-	// 1 6 -> 1 6
-	// 247 -> 035
-	const int patchV[] = { 2, 1, 0, 4, 3, 7, 6, 5 };
-	transformPatch(part, patchV);
-}
 
 static unsigned int prevColor(unsigned int flags)
 {
@@ -356,21 +324,22 @@ int Element_PIPE_update(UPDATE_FUNC_ARGS)
 int Element_PIPE_graphics(GRAPHICS_FUNC_ARGS)
 {
 	int t = TYP(cpart->ctype);
-	if (t>0 && t<PT_NUM && ren->sim->elements[t].Enabled)
+	if (t>0 && t<PT_NUM && sim->elements[t].Enabled)
 	{
 		if (t == PT_STKM || t == PT_STKM2 || t == PT_FIGH)
 			return 0;
-		if (ren->graphicscache[t].isready)
+		auto &gcache = ren->GraphicsCache();
+		if (gcache[t].ready)
 		{
-			*pixel_mode = ren->graphicscache[t].pixel_mode;
-			*cola = ren->graphicscache[t].cola;
-			*colr = ren->graphicscache[t].colr;
-			*colg = ren->graphicscache[t].colg;
-			*colb = ren->graphicscache[t].colb;
-			*firea = ren->graphicscache[t].firea;
-			*firer = ren->graphicscache[t].firer;
-			*fireg = ren->graphicscache[t].fireg;
-			*fireb = ren->graphicscache[t].fireb;
+			*pixel_mode = gcache[t].pixelMode;
+			*cola = gcache[t].colA;
+			*colr = gcache[t].colR;
+			*colg = gcache[t].colG;
+			*colb = gcache[t].colB;
+			*firea = gcache[t].firA;
+			*firer = gcache[t].firR;
+			*fireg = gcache[t].firG;
+			*fireb = gcache[t].firB;
 		}
 		else
 		{
@@ -381,16 +350,16 @@ int Element_PIPE_graphics(GRAPHICS_FUNC_ARGS)
 			tpart.tmp = cpart->tmp3;
 			tpart.ctype = cpart->tmp4;
 
-			*colr = PIXR(ren->sim->elements[t].Colour);
-			*colg = PIXG(ren->sim->elements[t].Colour);
-			*colb = PIXB(ren->sim->elements[t].Colour);
-			if (ren->sim->elements[t].Graphics)
+			*colr = PixR(sim->elements[t].Colour);
+			*colg = PixG(sim->elements[t].Colour);
+			*colb = PixB(sim->elements[t].Colour);
+			if (sim->elements[t].Graphics)
 			{
-				(*(ren->sim->elements[t].Graphics))(ren, &tpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
+				sim->elements[t].Graphics(ren, sim, &tpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
 			}
 			else
 			{
-				Element::defaultGraphics(ren, &tpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
+				Element::defaultGraphics(ren, sim, &tpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
 			}
 		}
 		//*colr = PIXR(elements[t].pcolors);

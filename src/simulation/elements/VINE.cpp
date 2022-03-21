@@ -8,7 +8,7 @@ void Element::Element_VINE()
 {
 	Identifier = "DEFAULT_PT_VINE";
 	Name = "VINE";
-	Colour = PIXPACK(0x079A00);
+	Colour = 0x079A00;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_VINE()
 	Weight = 100;
 
 	HeatConduct = 65;
-	Description = "Vine, can grow along WOOD.";
 
 	Properties = TYPE_SOLID;
 

@@ -3,34 +3,33 @@
 
 #include <cmath>
 
-static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength);
+static void draw(DRAW_FUNC_ARGS);
 
 void SimTool::Tool_CYCL()
 {
 	Identifier = "DEFAULT_TOOL_CYCL";
 	Name = "CYCL";
-	Colour = PIXPACK(0x132f5b);
-	Description = "Cyclone, produces swirling air currents";
-	Perform = &perform;
+	Colour = 0x132f5b;
+	Draw = &draw;
 }
 
-static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength)
+static void draw(DRAW_FUNC_ARGS)
 {
 	/*
 		Air velocity calculation.
-		(x, y) -- turn 90 deg -> (-y, x)
+		(pos.x, pos.y) -- turn 90 deg -> (-pos.y, pos.x)
 	*/
 	// only trigger once per cell (less laggy)
-	if ((x%CELL) == 0 && (y%CELL) == 0)
+	if ((pos.x%CELL) == 0 && (pos.y%CELL) == 0)
 	{
-		if(brushX == x && brushY == y)
-			return 1;
+		if(origin.x == pos.x && origin.y == pos.y)
+			return;
 
-		float *vx = &sim->air->vx[y / CELL][x / CELL];
-		float *vy = &sim->air->vy[y / CELL][x / CELL];
+		float *vx = &sim->air->vx[pos.y / CELL][pos.x / CELL];
+		float *vy = &sim->air->vy[pos.y / CELL][pos.x / CELL];
 
-		auto dvx = float(brushX - x);
-		auto dvy = float(brushY - y);
+		auto dvx = float(origin.x - pos.x);
+		auto dvy = float(origin.y - pos.y);
 		float invsqr = 1/sqrtf(dvx*dvx + dvy*dvy);
 
 		*vx -= (strength / 16) * (-dvy)*invsqr;
@@ -47,6 +46,4 @@ static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX,
 			*vy = -256.0f;
 
 	}
-
-	return 1;
 }

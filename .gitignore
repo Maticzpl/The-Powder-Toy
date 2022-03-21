@@ -1,6 +1,5 @@
 # Misc extensions, system files
 *.zip
-*.txt
 *.gz
 *.out
 *.sh
@@ -90,5 +89,6 @@ screenshot_*
 *.opensdf
 *.sdf
 /font/
+ignore/
 compile_commands.json
 ignore/

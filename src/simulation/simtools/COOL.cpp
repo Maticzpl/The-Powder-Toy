@@ -1,20 +1,19 @@
 #include "simulation/ToolCommon.h"
 
-static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength);
+static void draw(DRAW_FUNC_ARGS);
 
 void SimTool::Tool_COOL()
 {
 	Identifier = "DEFAULT_TOOL_COOL";
 	Name = "COOL";
-	Colour = PIXPACK(0x00DDFF);
-	Description = "Cools the targeted element.";
-	Perform = &perform;
+	Colour = 0x00DDFF;
+	Draw = &draw;
 }
 
-static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength)
+static void draw(DRAW_FUNC_ARGS)
 {
 	if(!cpart)
-		return 0;
+		return;
 	if (cpart->type == PT_PUMP || cpart->type == PT_GPMP)
 		cpart->temp -= strength*.1f;
 	else
@@ -24,5 +23,4 @@ static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX,
 		cpart->temp = MAX_TEMP;
 	else if (cpart->temp < 0)
 		cpart->temp = 0;
-	return 1;
 }

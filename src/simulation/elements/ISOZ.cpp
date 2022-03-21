@@ -6,7 +6,7 @@ void Element::Element_ISOZ()
 {
 	Identifier = "DEFAULT_PT_ISOZ";
 	Name = "ISOZ";
-	Colour = PIXPACK(0xAA30D0);
+	Colour = 0xAA30D0;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_ISOZ()
 
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
-	Description = "Isotope-Z. Radioactive liquid, decays into photons when touching PHOT or under negative pressure.";
 
 	Properties = TYPE_LIQUID|PROP_NEUTPENETRATE;
 

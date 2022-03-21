@@ -7,7 +7,7 @@ void Element::Element_PUMP()
 {
 	Identifier = "DEFAULT_PT_PUMP";
 	Name = "PUMP";
-	Colour = PIXPACK(0x0A0A3B);
+	Colour = 0x0A0A3B;
 	MenuVisible = 1;
 	MenuSection = SC_POWERED;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_PUMP()
 
 	DefaultProperties.temp = 273.15f;
 	HeatConduct = 0;
-	Description = "Pressure pump. Changes pressure to its temp when activated. (use HEAT/COOL).";
 
 	Properties = TYPE_SOLID;
 

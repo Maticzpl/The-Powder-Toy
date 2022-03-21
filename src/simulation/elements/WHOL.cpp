@@ -4,7 +4,7 @@ void Element::Element_WHOL()
 {
 	Identifier = "DEFAULT_PT_WHOL";
 	Name = "VENT";
-	Colour = PIXPACK(0xEFEFEF);
+	Colour = 0xEFEFEF;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -28,7 +28,6 @@ void Element::Element_WHOL()
 
 	DefaultProperties.temp = R_TEMP - 16.0f + 273.15f;
 	HeatConduct = 255;
-	Description = "Air vent, creates pressure and pushes other particles away.";
 
 	Properties = TYPE_SOLID;
 

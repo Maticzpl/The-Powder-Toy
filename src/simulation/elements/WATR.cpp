@@ -6,7 +6,7 @@ void Element::Element_WATR()
 {
 	Identifier = "DEFAULT_PT_WATR";
 	Name = "WATR";
-	Colour = PIXPACK(0x2030D0);
+	Colour = 0x2030D0;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_WATR()
 
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
-	Description = "Water. Conducts electricity, freezes, and extinguishes fires.";
 
 	Properties = TYPE_LIQUID|PROP_CONDUCTS|PROP_LIFE_DEC|PROP_NEUTPASS;
 

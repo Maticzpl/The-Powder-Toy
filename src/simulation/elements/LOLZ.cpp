@@ -4,7 +4,7 @@ void Element::Element_LOLZ()
 {
 	Identifier = "DEFAULT_PT_LOLZ";
 	Name = "LOLZ";
-	Colour = PIXPACK(0x569212);
+	Colour = 0x569212;
 	MenuVisible = 1;
 	MenuSection = SC_CRACKER2;
 	Enabled = 1;
@@ -28,7 +28,6 @@ void Element::Element_LOLZ()
 
 	DefaultProperties.temp = 373.0f;
 	HeatConduct = 40;
-	Description = "Lolz";
 
 	Properties = TYPE_SOLID;
 

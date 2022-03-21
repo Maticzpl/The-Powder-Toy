@@ -1,5 +1,6 @@
 #include "simulation/ElementCommon.h"
-#include "hmap.h"
+#include "graphics/SimulationRenderer.h"
+#include "graphics/Pix.h"
 
 static int graphics(GRAPHICS_FUNC_ARGS);
 static void create(ELEMENT_CREATE_FUNC_ARGS);
@@ -8,7 +9,7 @@ void Element::Element_CFLM()
 {
 	Identifier = "DEFAULT_PT_HFLM";
 	Name = "CFLM";
-	Colour = PIXPACK(0x8080FF);
+	Colour = 0x8080FF;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -32,7 +33,6 @@ void Element::Element_CFLM()
 
 	DefaultProperties.temp = 0.0f;
 	HeatConduct = 88;
-	Description = "Sub-zero flame.";
 
 	Properties = TYPE_GAS|PROP_LIFE_DEC|PROP_LIFE_KILL;
 
@@ -51,10 +51,15 @@ void Element::Element_CFLM()
 
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
-	int caddress = int(restrict_flt(float(cpart->life / 2), 0, 199)) * 3;
-	*colr = hflm_data[caddress];
-	*colg = hflm_data[caddress+1];
-	*colb = hflm_data[caddress+2];
+	auto &ctbl = ren->ClfmTable();
+	auto ctbls = int(ctbl.size());
+	auto caddress = cpart->life / 2;
+	if (caddress <         0) caddress =         0;
+	if (caddress > ctbls - 1) caddress = ctbls - 1;
+	auto col = ctbl[caddress];
+	*colr = PixR(col);
+	*colg = PixG(col);
+	*colb = PixB(col);
 
 	*firea = 255;
 	*firer = *colr;

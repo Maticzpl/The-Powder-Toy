@@ -4,6 +4,8 @@
 
 #include "common/String.h"
 
+#include <cstdint>
+
 #ifdef WIN
 # include <string>
 #endif
@@ -21,6 +23,9 @@ namespace Platform
 
 	void LoadFileInResource(int name, int type, unsigned int& size, const char*& data);
 
+	bool WriteFile(std::vector<char> data, ByteString path);
+	std::vector<char> ReadFile(ByteString path);
+
 	bool Stat(ByteString filename);
 	bool FileExists(ByteString filename);
 	bool DirectoryExists(ByteString directory);
@@ -28,6 +33,7 @@ namespace Platform
 	 * @return true on success
 	 */
 	bool RemoveFile(ByteString filename);
+	bool RenameFile(ByteString from, ByteString to);
 
 	/**
 	 * @return true on success
@@ -41,10 +47,14 @@ namespace Platform
 	std::vector<ByteString> DirectorySearch(ByteString directory, ByteString search, std::vector<ByteString> extensions);
 	String DoMigration(ByteString fromDir, ByteString toDir);
 
+	ByteString ParentDirectory(ByteString path);
+
 #ifdef WIN
 	ByteString WinNarrow(const std::wstring &source);
 	std::wstring WinWiden(const ByteString &source);
 #endif
+
+	void OpenDataFolder();
 
 	extern std::string originalCwd;
 	extern std::string sharedCwd;

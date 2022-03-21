@@ -13,27 +13,23 @@
 #include "simulation/Air.h"
 #include "simulation/ElementClasses.h"
 
-#include "gui/game/GameController.h"
-#include "gui/game/GameModel.h"
+#include "activities/game/Game.h"
 
-#include "gui/interface/Engine.h"
+// #include "gui/interface/Engine.h"
 
 #include "common/tpt-compat.h"
 
-TPTScriptInterface::TPTScriptInterface(GameController * c, GameModel * m): CommandInterface(c, m)
-{
-}
-
-int TPTScriptInterface::Command(String command)
+CommandInterface::CommandResult TPTScriptInterface::Execute(const String &command)
 {
 	lastError = "";
 	std::deque<String> words;
 	std::deque<AnyType> commandWords;
-	int retCode = -1;
+	CommandInterface::CommandResult retCode = CommandInterface::commandRuntimeError;
 
 	//Split command into words, put them on the stack
 	for(String word : command.PartitionBy(' '))
 		words.push_back(word);
+	closeConsole = false;
 	while(!words.empty())
 	{
 		try
@@ -42,14 +38,18 @@ int TPTScriptInterface::Command(String command)
 		}
 		catch (GeneralException & e)
 		{
-			retCode = -1;
+			retCode = CommandInterface::commandRuntimeError;
 			lastError = e.GetExceptionMessage();
 			break;
 		}
 	}
 	if(commandWords.size())
 	{
-		retCode = 0;
+		retCode = CommandInterface::commandOk;
+		if (closeConsole)
+		{
+			retCode = CommandInterface::commandOkCloseConsole;
+		}
 		lastError = ((StringType)commandWords.front()).Value();
 	}
 
@@ -217,7 +217,7 @@ AnyType TPTScriptInterface::eval(std::deque<String> * words)
 	return StringType(word);
 }
 
-String TPTScriptInterface::FormatCommand(String command)
+String TPTScriptInterface::FormatCommand(const String &command)
 {
 	std::deque<String> words;
 	std::deque<AnyType> commandWords;
@@ -258,7 +258,7 @@ AnyType TPTScriptInterface::tptS_set(std::deque<String> * words)
 	AnyType selector = eval(words);
 	AnyType value = eval(words);
 
-	Simulation * sim = m->GetSimulation();
+	Simulation * sim = game->GetSimulation();
 	unsigned char * partsBlock = (unsigned char*)&sim->parts[0];
 
 	int returnValue = 0;
@@ -293,7 +293,7 @@ AnyType TPTScriptInterface::tptS_set(std::deque<String> * words)
 		}
 		else
 		{
-			newValue = m->GetSimulation()->GetParticleType(((StringType)value).Value().ToUtf8());
+			newValue = game->GetSimulation()->GetParticleType(((StringType)value).Value().ToUtf8());
 			if (newValue < 0 || newValue >= PT_NUM)
 			{
 				// TODO: add element CAKE to invalidate this
@@ -313,8 +313,8 @@ AnyType TPTScriptInterface::tptS_set(std::deque<String> * words)
 		int partIndex = -1;
 		if(selector.GetType() == TypePoint)
 		{
-			ui::Point tempPoint = ((PointType)selector).Value();
-			if(tempPoint.X<0 || tempPoint.Y<0 || tempPoint.Y >= YRES || tempPoint.X >= XRES)
+			gui::Point tempPoint = ((PointType)selector).Value();
+			if(tempPoint.x<0 || tempPoint.y<0 || tempPoint.y >= YRES || tempPoint.x >= XRES)
 				throw GeneralException("Invalid position");
 
 		}
@@ -383,7 +383,7 @@ AnyType TPTScriptInterface::tptS_set(std::deque<String> * words)
 		if (selector.GetType() == TypeNumber)
 			type = ((NumberType)selector).Value();
 		else if (selector.GetType() == TypeString)
-			type = m->GetSimulation()->GetParticleType(((StringType)selector).Value().ToUtf8());
+			type = game->GetSimulation()->GetParticleType(((StringType)selector).Value().ToUtf8());
 
 		if (type<0 || type>=PT_NUM)
 			throw GeneralException("Invalid particle type");
@@ -436,21 +436,21 @@ AnyType TPTScriptInterface::tptS_create(std::deque<String> * words)
 	AnyType createType = eval(words);
 	PointType position = eval(words);
 
-	Simulation * sim = m->GetSimulation();
+	Simulation * sim = game->GetSimulation();
 
 	int type;
 	if(createType.GetType() == TypeNumber)
 		type = ((NumberType)createType).Value();
 	else if(createType.GetType() == TypeString)
-		type = m->GetSimulation()->GetParticleType(((StringType)createType).Value().ToUtf8());
+		type = game->GetSimulation()->GetParticleType(((StringType)createType).Value().ToUtf8());
 	else
 		throw GeneralException("Invalid type");
 
 	if(type == -1)
 		throw GeneralException("Invalid particle type");
 
-	ui::Point tempPoint = position.Value();
-	if(tempPoint.X<0 || tempPoint.Y<0 || tempPoint.Y >= YRES || tempPoint.X >= XRES)
+	gui::Point tempPoint = position.Value();
+	if(tempPoint.x<0 || tempPoint.y<0 || tempPoint.y >= YRES || tempPoint.x >= XRES)
 				throw GeneralException("Invalid position");
 
 	int v = -1;
@@ -459,7 +459,7 @@ AnyType TPTScriptInterface::tptS_create(std::deque<String> * words)
 		v = ID(type);
 		type = TYP(type);
 	}
-	int returnValue = sim->create_part(-1, tempPoint.X, tempPoint.Y, type, v);
+	int returnValue = sim->create_part(-1, tempPoint.x, tempPoint.y, type, v);
 
 	return NumberType(returnValue);
 }
@@ -469,14 +469,14 @@ AnyType TPTScriptInterface::tptS_delete(std::deque<String> * words)
 	//Arguments from stack
 	AnyType partRef = eval(words);
 
-	Simulation * sim = m->GetSimulation();
+	Simulation * sim = game->GetSimulation();
 
 	if(partRef.GetType() == TypePoint)
 	{
-		ui::Point deletePoint = ((PointType)partRef).Value();
-		if(deletePoint.X<0 || deletePoint.Y<0 || deletePoint.Y >= YRES || deletePoint.X >= XRES)
+		gui::Point deletePoint = ((PointType)partRef).Value();
+		if(deletePoint.x<0 || deletePoint.y<0 || deletePoint.y >= YRES || deletePoint.x >= XRES)
 			throw GeneralException("Invalid position");
-		sim->delete_part(deletePoint.X, deletePoint.Y);
+		sim->delete_part(deletePoint.x, deletePoint.y);
 	}
 	else if(partRef.GetType() == TypeNumber)
 	{
@@ -498,7 +498,9 @@ AnyType TPTScriptInterface::tptS_load(std::deque<String> * words)
 
 	if (saveID.Value() > 0)
 	{
-		c->OpenSavePreview(saveID.Value(), 0, false);
+		// c->OpenSavePreview(saveID.Value(), 0, false);
+		// * TODO-REDO_UI
+		closeConsole = true;
 		return NumberType(0);
 	}
 	else
@@ -509,21 +511,21 @@ AnyType TPTScriptInterface::tptS_bubble(std::deque<String> * words)
 {
 	//Arguments from stack
 	PointType bubblePosA = eval(words);
-	ui::Point bubblePos = bubblePosA.Value();
+	gui::Point bubblePos = bubblePosA.Value();
 
-	if(bubblePos.X<0 || bubblePos.Y<0 || bubblePos.Y >= YRES || bubblePos.X >= XRES)
+	if(bubblePos.x<0 || bubblePos.y<0 || bubblePos.y >= YRES || bubblePos.x >= XRES)
 			throw GeneralException("Invalid position");
 
-	Simulation * sim = m->GetSimulation();
+	Simulation * sim = game->GetSimulation();
 
 	int first, rem1, rem2;
 
-	first = sim->create_part(-1, bubblePos.X+18, bubblePos.Y, PT_SOAP);
+	first = sim->create_part(-1, bubblePos.x+18, bubblePos.y, PT_SOAP);
 	rem1 = first;
 
 	for (int i = 1; i<=30; i++)
 	{
-		rem2 = sim->create_part(-1, int(bubblePos.X+18*cosf(i/5.0)+0.5f), int(bubblePos.Y+18*sinf(i/5.0)+0.5f), PT_SOAP);
+		rem2 = sim->create_part(-1, int(bubblePos.x+18*cosf(i/5.0)+0.5f), int(bubblePos.y+18*sinf(i/5.0)+0.5f), PT_SOAP);
 
 		sim->parts[rem1].ctype = 7;
 		sim->parts[rem1].tmp = rem2;
@@ -546,7 +548,7 @@ AnyType TPTScriptInterface::tptS_reset(std::deque<String> * words)
 	StringType reset = eval(words);
 	String resetStr = reset.Value();
 
-	Simulation * sim = m->GetSimulation();
+	Simulation * sim = game->GetSimulation();
 
 	if (resetStr == "pressure")
 	{
@@ -567,7 +569,8 @@ AnyType TPTScriptInterface::tptS_reset(std::deque<String> * words)
 	}
 	else if (resetStr == "sparks")
 	{
-		c->ResetSpark();
+		// c->ResetSpark();
+		// * TODO-REDO_UI
 	}
 	else if (resetStr == "temp")
 	{
@@ -589,7 +592,7 @@ AnyType TPTScriptInterface::tptS_reset(std::deque<String> * words)
 
 AnyType TPTScriptInterface::tptS_quit(std::deque<String> * words)
 {
-	ui::Engine::Ref().Exit();
+	// ui::Engine::Ref().Exit();
 
 	return NumberType(0);
 }

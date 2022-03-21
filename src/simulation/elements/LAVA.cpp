@@ -8,7 +8,7 @@ void Element::Element_LAVA()
 {
 	Identifier = "DEFAULT_PT_LAVA";
 	Name = "LAVA";
-	Colour = PIXPACK(0xE05010);
+	Colour = 0xE05010;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -33,7 +33,6 @@ void Element::Element_LAVA()
 
 	DefaultProperties.temp = R_TEMP + 1500.0f + 273.15f;
 	HeatConduct = 60;
-	Description = "Molten lava. Ignites flammable materials. Generated when metals and other materials melt, solidifies when cold.";
 
 	Properties = TYPE_LIQUID|PROP_LIFE_DEC;
 

@@ -1,25 +1,31 @@
 gui_files = files(
-	'Style.cpp',
+	'Button.cpp',
+	'ButtonMenu.cpp',
+	'CheckBox.cpp',
+	'Component.cpp',
+	'Dragger.cpp',
+	'DropDown.cpp',
+	'IconTextBox.cpp',
+	'Image.cpp',
+	'ImageButton.cpp',
+	'Label.cpp',
+	'LinearDelayAnimation.cpp',
+	'ModalWindow.cpp',
+	'MomentumAnimation.cpp',
+	'Pagination.cpp',
+	'PopupWindow.cpp',
+	'ProgressBar.cpp',
+	'ScrollPanel.cpp',
+	'SDLWindow.cpp',
+	'Separator.cpp',
+	'Spinner.cpp',
+	'Static.cpp',
+	'TextBox.cpp',
+	'Texture.cpp',
+	'TextWrapper.cpp',
+	'Time.cpp',
+	'TrackBar.cpp',
 )
-
-subdir('colourpicker')
-subdir('console')
-subdir('dialogues')
-subdir('elementsearch')
-subdir('filebrowser')
-subdir('font')
-subdir('game')
-subdir('interface')
-subdir('localbrowser')
-subdir('login')
-subdir('options')
-subdir('preview')
-subdir('profile')
-subdir('render')
-subdir('save')
-subdir('search')
-subdir('tags')
-subdir('update')
 
 powder_files += gui_files
 font_files += gui_files

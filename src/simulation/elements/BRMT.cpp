@@ -6,7 +6,7 @@ void Element::Element_BRMT()
 {
 	Identifier = "DEFAULT_PT_BRMT";
 	Name = "BRMT";
-	Colour = PIXPACK(0x705060);
+	Colour = 0x705060;
 	MenuVisible = 1;
 	MenuSection = SC_POWDERS;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_BRMT()
 	Weight = 90;
 
 	HeatConduct = 211;
-	Description = "Broken metal. Created when iron rusts or when metals break from pressure.";
 
 	Properties = TYPE_PART|PROP_CONDUCTS|PROP_LIFE_DEC|PROP_HOT_GLOW;
 

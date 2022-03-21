@@ -4,7 +4,7 @@ void Element::Element_DESL()
 {
 	Identifier = "DEFAULT_PT_DESL";
 	Name = "DESL";
-	Colour = PIXPACK(0x440000);
+	Colour = 0x440000;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -27,7 +27,6 @@ void Element::Element_DESL()
 	Weight = 15;
 
 	HeatConduct = 42;
-	Description = "Liquid diesel. Explodes under high pressure and temperatures.";
 
 	Properties = TYPE_LIQUID;
 

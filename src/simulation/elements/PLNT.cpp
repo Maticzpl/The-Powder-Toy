@@ -8,7 +8,7 @@ void Element::Element_PLNT()
 {
 	Identifier = "DEFAULT_PT_PLNT";
 	Name = "PLNT";
-	Colour = PIXPACK(0x0CAC00);
+	Colour = 0x0CAC00;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -32,7 +32,6 @@ void Element::Element_PLNT()
 	Weight = 100;
 
 	HeatConduct = 65;
-	Description = "Plant, drinks water and grows.";
 
 	Properties = TYPE_SOLID|PROP_NEUTPENETRATE|PROP_LIFE_DEC;
 

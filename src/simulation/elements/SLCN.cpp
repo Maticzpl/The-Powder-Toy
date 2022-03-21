@@ -1,4 +1,5 @@
 #include "simulation/ElementCommon.h"
+#include "graphics/Pix.h"
 
 static int update(UPDATE_FUNC_ARGS);
 static int graphics(GRAPHICS_FUNC_ARGS);
@@ -8,7 +9,7 @@ void Element::Element_SLCN()
 {
 	Identifier = "DEFAULT_PT_SLCN";
 	Name = "SLCN";
-	Colour = PIXPACK(0xBCCDDF);
+	Colour = 0xBCCDDF;
 	MenuVisible = 1;
 	MenuSection = SC_POWDERS;
 	Enabled = 1;
@@ -31,7 +32,6 @@ void Element::Element_SLCN()
 	Weight = 90;
 
 	HeatConduct = 100;
-	Description = "Powdered Silicon. A key ingredient in producing multiple materials.";
 
 	Properties = TYPE_PART | PROP_CONDUCTS | PROP_HOT_GLOW | PROP_LIFE_DEC;
 
@@ -50,10 +50,10 @@ void Element::Element_SLCN()
 }
 
 static const int SLCN_COLOUR[16] = {
-	PIXPACK(0x5A6679), PIXPACK(0x6878A1), PIXPACK(0xABBFDD), PIXPACK(0x838490),
-	PIXPACK(0xBCCDDF), PIXPACK(0x82A0D2), PIXPACK(0x5B6680), PIXPACK(0x232C3B),
-	PIXPACK(0x485067), PIXPACK(0x8B9AB6), PIXPACK(0xADB1C1), PIXPACK(0xC3C6D1),
-	PIXPACK(0x8594AD), PIXPACK(0x262F47), PIXPACK(0xA9AEBC), PIXPACK(0xC2E1F7),
+	0x5A6679, 0x6878A1, 0xABBFDD, 0x838490,
+	0xBCCDDF, 0x82A0D2, 0x5B6680, 0x232C3B,
+	0x485067, 0x8B9AB6, 0xADB1C1, 0xC3C6D1,
+	0x8594AD, 0x262F47, 0xA9AEBC, 0xC2E1F7,
 };
 
 static void initSparkles(Particle &part)
@@ -112,15 +112,15 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 	if (cpart->tmp & 0x800) // mix with next colour if phase is at least halfway there
 	{
 		int next_colour = SLCN_COLOUR[(cpart->tmp >> 16) & 15];
-		curr_colour = PIXRGB(
-			(PIXR(curr_colour) + PIXR(next_colour)) / 2,
-			(PIXG(curr_colour) + PIXG(next_colour)) / 2,
-			(PIXB(curr_colour) + PIXB(next_colour)) / 2
+		curr_colour = PixRGB(
+			(PixR(curr_colour) + PixR(next_colour)) / 2,
+			(PixG(curr_colour) + PixG(next_colour)) / 2,
+			(PixB(curr_colour) + PixB(next_colour)) / 2
 		);
 	}
-	*colr = PIXR(curr_colour);
-	*colg = PIXG(curr_colour);
-	*colb = PIXB(curr_colour);
+	*colr = PixR(curr_colour);
+	*colg = PixG(curr_colour);
+	*colb = PixB(curr_colour);
 
 	int rnd = (cpart->tmp & 0xFFFF) * ((cpart->tmp >> 16) & 0xFFFF);
 	if (!(rnd % 887))

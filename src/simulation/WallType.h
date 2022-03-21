@@ -2,15 +2,24 @@
 #define WALLTYPE_H_
 
 #include "common/String.h"
-#include "graphics/Pixel.h"
-class VideoBuffer;
+
+#include <cstdint>
 
 struct wall_type
 {
-	pixel colour;
-	pixel eglow; // if emap set, add this to fire glow
-	int drawstyle;
-	VideoBuffer * (*textureGen)(int, int, int);
+	uint32_t colour;
+	uint32_t eglow; // if emap set, add this to fire glow
+	enum DrawStyle
+	{
+		SOLIDDOT,
+		SPARSEDOT,
+		HEXAGONAL,
+		POWERED0,
+		POWERED1,
+		DIAGONAL,
+		SPECIAL,
+	};
+	DrawStyle drawstyle;
 	String name;
 	ByteString identifier;
 	String descs;

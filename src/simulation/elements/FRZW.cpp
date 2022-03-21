@@ -6,7 +6,7 @@ void Element::Element_FRZW()
 {
 	Identifier = "DEFAULT_PT_FRZW";
 	Name = "FRZW";
-	Colour = PIXPACK(0x1020C0);
+	Colour = 0x1020C0;
 	MenuVisible = 1;
 	MenuSection = SC_CRACKER2;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_FRZW()
 
 	DefaultProperties.temp = 120.0f;
 	HeatConduct = 29;
-	Description = "Freeze water. Hybrid liquid formed when Freeze powder melts.";
 
 	Properties = TYPE_LIQUID | PROP_LIFE_DEC;
 

@@ -6,7 +6,7 @@ void Element::Element_CLNE()
 {
 	Identifier = "DEFAULT_PT_CLNE";
 	Name = "CLNE";
-	Colour = PIXPACK(0xFFD010);
+	Colour = 0xFFD010;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_CLNE()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Clone. Duplicates any particles it touches.";
 
 	Properties = TYPE_SOLID | PROP_NOCTYPEDRAW;
 

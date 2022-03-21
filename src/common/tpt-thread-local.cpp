@@ -5,6 +5,8 @@
 # include <cstdlib>
 # include <cassert>
 
+// * TODO-REDO_UI: Destruction order.
+
 void *ThreadLocalCommon::Get() const
 {
 	// https://stackoverflow.com/questions/16552710/how-do-you-get-the-start-and-end-addresses-of-a-custom-elf-section

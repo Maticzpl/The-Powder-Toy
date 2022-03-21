@@ -12,7 +12,7 @@ void Element::Element_TRON()
 {
 	Identifier = "DEFAULT_PT_TRON";
 	Name = "TRON";
-	Colour = PIXPACK(0xA9FF00);
+	Colour = 0xA9FF00;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -36,7 +36,6 @@ void Element::Element_TRON()
 
 	DefaultProperties.temp = 0.0f;
 	HeatConduct = 40;
-	Description = "Smart particles, Travels in straight lines and avoids obstacles. Grows with time.";
 
 	Properties = TYPE_SOLID|PROP_LIFE_DEC|PROP_LIFE_KILL;
 
@@ -90,7 +89,7 @@ static void init_graphics()
 	int r, g, b;
 	for (i=0; i<32; i++)
 	{
-		HSV_to_RGB(i<<4,255,255,&r,&g,&b);
+		HSV_to_RGB(i<<4,100,100,&r,&g,&b);
 		tron_colours[i] = r<<16 | g<<8 | b;
 	}
 }

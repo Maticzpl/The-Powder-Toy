@@ -1,14 +1,15 @@
 #pragma once
 
-#include "graphics/Pixel.h"
 #include "common/String.h"
+
+#include <cstdint>
 
 struct BuiltinGOL
 {
+	String identifier;
 	String name;
 	int oldtype;
 	int ruleset;
-	pixel colour, colour2;
+	uint32_t colour, colour2;
 	int goltype;
-	String description;
 };

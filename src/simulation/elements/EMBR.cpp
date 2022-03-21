@@ -1,4 +1,5 @@
 #include "simulation/ElementCommon.h"
+#include "graphics/SimulationRenderer.h"
 
 static int update(UPDATE_FUNC_ARGS);
 static int graphics(GRAPHICS_FUNC_ARGS);
@@ -7,7 +8,7 @@ void Element::Element_EMBR()
 {
 	Identifier = "DEFAULT_PT_EMBR";
 	Name = "EMBR";
-	Colour = PIXPACK(0xFFF288);
+	Colour = 0xFFF288;
 	MenuVisible = 0;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -31,7 +32,6 @@ void Element::Element_EMBR()
 
 	DefaultProperties.temp = 500.0f + 273.15f;
 	HeatConduct = 29;
-	Description = "Sparks. Formed by explosions.";
 
 	Properties = TYPE_PART|PROP_LIFE_DEC|PROP_LIFE_KILL|PROP_SPARKSETTLE;
 
@@ -95,9 +95,9 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 	}
 
 	bool deco = false;
-	if (ren->decorations_enable && cpart->dcolour && (cpart->dcolour&0xFF000000))
+	if (ren->DecorationsEnabled() && cpart->dcolour && (cpart->dcolour&0xFF000000))
 	{
-		if (!ren->blackDecorations) // if blackDecorations is off, always show deco
+		if (!ren->BlackDecorations()) // if blackDecorations is off, always show deco
 			deco = true;
 		else if (((cpart->dcolour>>24)&0xFF) >= 250 && ((cpart->dcolour>>16)&0xFF) <= 5 && ((cpart->dcolour>>8)&0xFF) <= 5 && ((cpart->dcolour)&0xFF) <= 5) // else only render black deco
 			deco = true;

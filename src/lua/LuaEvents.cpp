@@ -3,7 +3,7 @@
 # include "LuaCompat.h"
 # include "LuaScriptInterface.h"
 # include "common/Platform.h"
-# include "gui/interface/Engine.h"
+// # include "gui/interface/Engine.h"
 #endif
 
 void Event::PushInteger(lua_State * l, int num)
@@ -193,7 +193,7 @@ int LuaEvents::UnregisterEventHook(lua_State *l, ByteString eventName)
 
 bool LuaEvents::HandleEvent(LuaScriptInterface *luacon_ci, Event *event, ByteString eventName)
 {
-	ui::Engine::Ref().LastTick(Platform::GetTime());
+	// ui::Engine::Ref().LastTick(Platform::GetTime());
 	bool cont = true;
 	lua_State* l = luacon_ci->l;
 	lua_pushstring(l, eventName.c_str());
@@ -216,7 +216,7 @@ bool LuaEvents::HandleEvent(LuaScriptInterface *luacon_ci, Event *event, ByteStr
 		{
 			if (luacon_geterror(luacon_ci) == "Error: Script not responding")
 			{
-				ui::Engine::Ref().LastTick(Platform::GetTime());
+				// ui::Engine::Ref().LastTick(Platform::GetTime());
 				for (int j = i; j <= len - 1; j++)
 				{
 					lua_rawgeti(l, -2, j + 1);

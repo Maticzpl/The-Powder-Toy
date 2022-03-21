@@ -6,7 +6,7 @@ void Element::Element_BRAY()
 {
 	Identifier = "DEFAULT_PT_BRAY";
 	Name = "BRAY";
-	Colour = PIXPACK(0xFFFFFF);
+	Colour = 0xFFFFFF;
 	MenuVisible = 0;
 	MenuSection = SC_ELEC;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_BRAY()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Ray Point. Rays create points when they collide.";
 
 	Properties = TYPE_SOLID|PROP_LIFE_DEC|PROP_LIFE_KILL;
 

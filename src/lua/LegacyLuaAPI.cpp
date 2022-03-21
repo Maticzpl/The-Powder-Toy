@@ -9,26 +9,20 @@
 #include "LuaScriptHelper.h"
 #include "LuaScriptInterface.h"
 #include "LuaSmartRef.h"
-#include "PowderToy.h"
 
-#include "client/Client.h"
 #include "common/Platform.h"
-#include "graphics/Graphics.h"
-#include "graphics/Renderer.h"
+#include "graphics/SimulationRenderer.h"
+#include "gui/SDLWindow.h"
 #include "simulation/ElementCommon.h"
 #include "simulation/Gravity.h"
 #include "simulation/Simulation.h"
 #include "simulation/SimulationData.h"
 
-#include "client/http/Request.h"
-#include "gui/dialogues/ConfirmPrompt.h"
-#include "gui/dialogues/ErrorMessage.h"
-#include "gui/dialogues/InformationMessage.h"
-#include "gui/dialogues/TextPrompt.h"
-#include "gui/game/GameController.h"
-#include "gui/game/GameModel.h"
-#include "gui/interface/Engine.h"
-#include "gui/interface/Keys.h"
+#include "activities/game/Game.h"
+
+#ifdef DrawText
+# undef DrawText // thank you windows
+#endif
 
 std::map<ByteString, StructProperty> legacyPropNames;
 std::map<ByteString, StructProperty> legacyTransitionNames;
@@ -262,27 +256,28 @@ int luacon_elementwrite(lua_State* l)
 		LuaScriptInterface::LuaSetProperty(l, prop, propertyAddress, 3);
 	}
 
-	luacon_model->BuildMenus();
+	luacon_game->ShouldBuildToolPanel();
 	luacon_sim->init_can_move();
-	std::fill(&luacon_ren->graphicscache[0], &luacon_ren->graphicscache[PT_NUM], gcache_item());
+	luacon_ren->FlushGraphicsCache(0, PT_NUM);
 
 	return 0;
 }
 
 int luacon_eval(const char *command)
 {
-	ui::Engine::Ref().LastTick(Platform::GetTime());
-	return luaL_dostring (luacon_ci->l, command);
+	// ui::Engine::Ref().LastTick(Platform::GetTime());
+	// return luaL_dostring (luacon_ci->l, command);
+	return 0;
 }
 
 void luacon_hook(lua_State * l, lua_Debug * ar)
 {
-	if(ar->event == LUA_HOOKCOUNT && Platform::GetTime()-ui::Engine::Ref().LastTick() > 3000)
-	{
-		if(ConfirmPrompt::Blocking("Script not responding", "The Lua script may have stopped responding. There might be an infinite loop. Press \"Stop\" to stop it", "Stop"))
-			luaL_error(l, "Error: Script not responding");
-		ui::Engine::Ref().LastTick(Platform::GetTime());
-	}
+	// if(ar->event == LUA_HOOKCOUNT && Platform::GetTime()-ui::Engine::Ref().LastTick() > 3000)
+	// {
+	// 	// if(ConfirmPrompt::Blocking("Script not responding", "The Lua script may have stopped responding. There might be an infinite loop. Press \"Stop\" to stop it", "Stop"))
+	// 	// 	luaL_error(l, "Error: Script not responding");
+	// 	ui::Engine::Ref().LastTick(Platform::GetTime());
+	// }
 }
 
 String luacon_geterror()
@@ -365,7 +360,7 @@ int luatpt_graphics_func(lua_State *l)
 		if (luacon_sim->IsElement(element))
 		{
 			lua_gr_func[element].Assign(l, 1);
-			luacon_ren->graphicscache[element].isready = 0;
+			luacon_ren->FlushGraphicsCache(element, element + 1);
 			return 0;
 		}
 		else
@@ -379,7 +374,7 @@ int luatpt_graphics_func(lua_State *l)
 		if (luacon_sim->IsElement(element))
 		{
 			lua_gr_func[element].Clear();
-			luacon_ren->graphicscache[element].isready = 0;
+			luacon_ren->FlushGraphicsCache(element, element + 1);
 			return 0;
 		}
 		else
@@ -394,8 +389,8 @@ int luatpt_graphics_func(lua_State *l)
 
 int luatpt_error(lua_State* l)
 {
-	String errorMessage = ByteString(luaL_optstring(l, 1, "Error text")).FromUtf8();
-	ErrorMessage::Blocking("Error", errorMessage);
+	// String errorMessage = ByteString(luaL_optstring(l, 1, "Error text")).FromUtf8();
+	// ErrorMessage::Blocking("Error", errorMessage);
 	return 0;
 }
 
@@ -421,7 +416,7 @@ int luatpt_drawtext(lua_State* l)
 	if (textalpha<0) textalpha = 0;
 	if (textalpha>255) textalpha = 255;
 
-	luacon_g->drawtext(textx, texty, ByteString(string).FromUtf8(), textred, textgreen, textblue, textalpha);
+	gui::SDLWindow::Ref().DrawText({ textx, texty }, ByteString(string).FromUtf8(), { textred, textgreen, textblue, textalpha });
 	return 0;
 }
 
@@ -457,40 +452,39 @@ int luatpt_setpause(lua_State* l)
 	int acount = lua_gettop(l);
 	if (acount == 0)
 	{
-		lua_pushnumber(l, luacon_model->GetPaused());
+		lua_pushnumber(l, luacon_game->Paused() ? 1 : 0);
 		return 1;
 	}
-	int pausestate = luaL_checkinteger(l, 1);
-	luacon_model->SetPaused(pausestate==0?0:1);
+	luacon_game->Paused(luaL_checkinteger(l, 1) != 0);
 	return 0;
 }
 
 int luatpt_togglepause(lua_State* l)
 {
-	luacon_model->SetPaused(!luacon_model->GetPaused());
-	lua_pushnumber(l, luacon_model->GetPaused());
+	luacon_game->Paused(!luacon_game->Paused());
+	lua_pushnumber(l, luacon_game->Paused() ? 1 : 0);
 	return 1;
 }
 
 int luatpt_togglewater(lua_State* l)
 {
-	luacon_sim->water_equal_test=!luacon_sim->water_equal_test;
-	lua_pushnumber(l, luacon_sim->water_equal_test);
+	luacon_game->WaterEqualisation(!luacon_game->WaterEqualisation());
+	lua_pushnumber(l, luacon_game->WaterEqualisation() ? 1 : 0);
 	return 1;
 }
 
 int luatpt_setconsole(lua_State* l)
 {
-	int acount = lua_gettop(l);
-	if (acount == 0)
-	{
-		lua_pushnumber(l, luacon_ci->Window != ui::Engine::Ref().GetWindow());
-		return 1;
-	}
-	if (luaL_checkinteger(l, 1))
-		luacon_controller->ShowConsole();
-	else
-		luacon_controller->HideConsole();
+	// int acount = lua_gettop(l);
+	// if (acount == 0)
+	// {
+	// 	lua_pushnumber(l, luacon_ci->Window != ui::Engine::Ref().GetWindow());
+	// 	return 1;
+	// }
+	// if (luaL_checkinteger(l, 1))
+	// 	luacon_controller->ShowConsole();
+	// else
+	// 	luacon_controller->HideConsole(); // * TODO-REDO_UI
 	return 0;
 }
 int luatpt_log(lua_State* l)
@@ -509,7 +503,7 @@ int luatpt_log(lua_State* l)
 	if((*luacon_currentCommand))
 	{
 		if(luacon_lastError->length())
-			*luacon_lastError += "; ";
+			*luacon_lastError += "\n";
 		*luacon_lastError += text;
 	}
 	else
@@ -632,7 +626,7 @@ int luatpt_reset_velocity(lua_State* l)
 
 int luatpt_reset_spark(lua_State* l)
 {
-	luacon_controller->ResetSpark();
+	// luacon_controller->ResetSpark(); // * TODO-REDO_UI
 	return 0;
 }
 
@@ -951,7 +945,7 @@ int luatpt_drawpixel(lua_State* l)
 	else if (b>255) b = 255;
 	if (a<0) a = 0;
 	else if (a>255) a = 255;
-	luacon_g->blendpixel(x, y, r, g, b, a);
+	// luacon_g->blendpixel(x, y, r, g, b, a); // * TODO-REDO_UI
 	return 0;
 }
 
@@ -981,7 +975,7 @@ int luatpt_drawrect(lua_State* l)
 	else if (b>255) b = 255;
 	if (a<0) a = 0;
 	else if (a>255) a = 255;
-	luacon_g->drawrect(x, y, w, h, r, g, b, a);
+	gui::SDLWindow::Ref().DrawRectOutline({ { x, y }, { w, h } }, { r, g, b, a });
 	return 0;
 }
 
@@ -1011,7 +1005,7 @@ int luatpt_fillrect(lua_State* l)
 	else if (b>255) b = 255;
 	if (a<0) a = 0;
 	else if (a>255) a = 255;
-	luacon_g->fillrect(x, y, w, h, r, g, b, a);
+	gui::SDLWindow::Ref().DrawRect({ { x, y }, { w, h } }, { r, g, b, a });
 	return 0;
 }
 
@@ -1036,26 +1030,23 @@ int luatpt_drawline(lua_State* l)
 	else if (b>255) b = 255;
 	if (a<0) a = 0;
 	else if (a>255) a = 255;
-	luacon_g->draw_line(x1, y1, x2, y2, r, g, b, a);
+	gui::SDLWindow::Ref().DrawLine({ x1, y1 }, { x2, y2 }, { r, g, b, a });
 	return 0;
 }
 
 int luatpt_textwidth(lua_State* l)
 {
-	int strwidth = 0;
-	const char* string = luaL_optstring(l, 1, "");
-	strwidth = Graphics::textwidth(ByteString(string).FromUtf8());
-	lua_pushinteger(l, strwidth);
+	lua_pushinteger(l, gui::SDLWindow::Ref().TextSize(ByteString(luaL_optstring(l, 1, "")).FromUtf8()).x);
 	return 1;
 }
 
 int luatpt_get_name(lua_State* l)
 {
-	if (luacon_model->GetUser().UserID)
-	{
-		lua_pushstring(l, luacon_model->GetUser().Username.c_str());
-		return 1;
-	}
+	// if (luacon_model->GetUser().UserID)
+	// {
+	// 	lua_pushstring(l, luacon_model->GetUser().Username.c_str());
+	// 	return 1;
+	// } // * TODO-REDO_UI
 	lua_pushstring(l, "");
 	return 1;
 }
@@ -1081,35 +1072,37 @@ int luatpt_delete(lua_State* l)
 
 int luatpt_input(lua_State* l)
 {
-	String prompt, title, result, shadow, text;
-	title = ByteString(luaL_optstring(l, 1, "Title")).FromUtf8();
-	prompt = ByteString(luaL_optstring(l, 2, "Enter some text:")).FromUtf8();
-	text = ByteString(luaL_optstring(l, 3, "")).FromUtf8();
-	shadow = ByteString(luaL_optstring(l, 4, "")).FromUtf8();
+	// String prompt, title, result, shadow, text;
+	// title = ByteString(luaL_optstring(l, 1, "Title")).FromUtf8();
+	// prompt = ByteString(luaL_optstring(l, 2, "Enter some text:")).FromUtf8();
+	// text = ByteString(luaL_optstring(l, 3, "")).FromUtf8();
+	// shadow = ByteString(luaL_optstring(l, 4, "")).FromUtf8();
 
-	result = TextPrompt::Blocking(title, prompt, text, shadow, false);
+	// result = TextPrompt::Blocking(title, prompt, text, shadow, false);
 
-	lua_pushstring(l, result.ToUtf8().c_str());
-	return 1;
+	// lua_pushstring(l, result.ToUtf8().c_str());
+	// return 1;
+	return 0;
 }
 
 int luatpt_message_box(lua_State* l)
 {
 	String title = ByteString(luaL_optstring(l, 1, "Title")).FromUtf8();
 	String message = ByteString(luaL_optstring(l, 2, "Message")).FromUtf8();
-	int large = lua_toboolean(l, 3);
-	new InformationMessage(title, message, large);
+	// int large = lua_toboolean(l, 3);
+	// new InformationMessage(title, message, large);
 	return 0;
 }
 
 int luatpt_confirm(lua_State *l)
 {
-	String title = ByteString(luaL_optstring(l, 1, "Title")).FromUtf8();
-	String message = ByteString(luaL_optstring(l, 2, "Message")).FromUtf8();
-	String buttonText = ByteString(luaL_optstring(l, 3, "Confirm")).FromUtf8();
-	bool ret = ConfirmPrompt::Blocking(title, message, buttonText);
-	lua_pushboolean(l, ret ? 1 : 0);
-	return 1;
+	// String title = ByteString(luaL_optstring(l, 1, "Title")).FromUtf8();
+	// String message = ByteString(luaL_optstring(l, 2, "Message")).FromUtf8();
+	// String buttonText = ByteString(luaL_optstring(l, 3, "Confirm")).FromUtf8();
+	// bool ret = ConfirmPrompt::Blocking(title, message, buttonText);
+	// lua_pushboolean(l, ret ? 1 : 0);
+	// return 1;
+	return 0;
 }
 
 int luatpt_get_numOfParts(lua_State* l)
@@ -1160,14 +1153,15 @@ int luatpt_hud(lua_State* l)
 	int acount = lua_gettop(l);
 	if (acount == 0)
 	{
-		lua_pushinteger(l, luacon_controller->GetHudEnable());
+		// lua_pushinteger(l, luacon_controller->GetHudEnable());
+		lua_pushinteger(l, 0); // * TODO-REDO_UI
 		return 1;
 	}
-	int hudstate = luaL_checkint(l, 1);
-	if (hudstate)
-		luacon_controller->SetHudEnable(1);
-	else
-		luacon_controller->SetHudEnable(0);
+	// int hudstate = luaL_checkint(l, 1);
+	// if (hudstate)
+	// 	luacon_controller->SetHudEnable(1);
+	// else
+	// 	luacon_controller->SetHudEnable(0);
 	return 0;
 }
 
@@ -1176,15 +1170,10 @@ int luatpt_gravity(lua_State* l)
 	int acount = lua_gettop(l);
 	if (acount == 0)
 	{
-		lua_pushinteger(l, luacon_sim->grav->IsEnabled() ? 1 : 0);
+		lua_pushinteger(l, luacon_game->NewtonianGravity() ? 1 : 0);
 		return 1;
 	}
-	int gravstate = luaL_checkint(l, 1);
-	if(gravstate)
-		luacon_sim->grav->start_grav_async();
-	else
-		luacon_sim->grav->stop_grav_async();
-	luacon_model->UpdateQuickOptions();
+	luacon_game->NewtonianGravity(luaL_checkint(l, 1));
 	return 0;
 }
 
@@ -1193,12 +1182,10 @@ int luatpt_airheat(lua_State* l)
 	int acount = lua_gettop(l);
 	if (acount == 0)
 	{
-		lua_pushinteger(l, luacon_sim->aheat_enable);
+		lua_pushinteger(l, luacon_game->AmbientHeat() ? 1 : 0);
 		return 1;
 	}
-	int aheatstate = luaL_checkint(l, 1);
-	luacon_sim->aheat_enable = (aheatstate==0?0:1);
-	luacon_model->UpdateQuickOptions();
+	luacon_game->AmbientHeat(luaL_checkint(l, 1) != 0);
 	return 0;
 }
 
@@ -1207,45 +1194,47 @@ int luatpt_active_menu(lua_State* l)
 	int acount = lua_gettop(l);
 	if (acount == 0)
 	{
-		lua_pushinteger(l, luacon_model->GetActiveMenu());
+		// lua_pushinteger(l, luacon_model->GetActiveMenu());
+		lua_pushinteger(l, 0); // * TODO-REDO_UI
 		return 1;
 	}
-	int menuid = luaL_checkint(l, 1);
-	if (menuid >= 0 && menuid < SC_TOTAL)
-		luacon_controller->SetActiveMenu(menuid);
-	else
-		return luaL_error(l, "Invalid menu");
+	// int menuid = luaL_checkint(l, 1);
+	// if (menuid >= 0 && menuid < SC_TOTAL)
+	// 	luacon_controller->SetActiveMenu(menuid);
+	// else
+	// 	return luaL_error(l, "Invalid menu");
 	return 0;
 }
 
 int luatpt_menu_enabled(lua_State* l)
 {
-	int menusection = luaL_checkint(l, 1);
-	if (menusection < 0 || menusection >= SC_TOTAL)
-		return luaL_error(l, "Invalid menu");
-	int acount = lua_gettop(l);
-	if (acount == 1)
-	{
-		lua_pushboolean(l, luacon_sim->msections[menusection].doshow);
-		return 1;
-	}
-	luaL_checktype(l, 2, LUA_TBOOLEAN);
-	int enabled = lua_toboolean(l, 2);
-	luacon_sim->msections[menusection].doshow = enabled;
-	luacon_model->BuildMenus();
+	// int menusection = luaL_checkint(l, 1);
+	// if (menusection < 0 || menusection >= SC_TOTAL)
+	// 	return luaL_error(l, "Invalid menu");
+	// int acount = lua_gettop(l);
+	// if (acount == 1)
+	// {
+	// 	lua_pushboolean(l, luacon_sim->msections[menusection].doshow);
+	// 	return 1;
+	// }
+	// luaL_checktype(l, 2, LUA_TBOOLEAN);
+	// int enabled = lua_toboolean(l, 2);
+	// luacon_sim->msections[menusection].doshow = enabled;
+	// luacon_game->ShouldBuildToolPanel(); // * TODO-REDO_UI
 	return 0;
 }
 
 int luatpt_num_menus(lua_State* l)
 {
-	int acount = lua_gettop(l);
-	bool onlyEnabled = true;
-	if (acount > 0)
-	{
-		luaL_checktype(l, 1, LUA_TBOOLEAN);
-		onlyEnabled = lua_toboolean(l, 1);
-	}
-	lua_pushinteger(l, luacon_controller->GetNumMenus(onlyEnabled));
+	// int acount = lua_gettop(l);
+	// bool onlyEnabled = true;
+	// if (acount > 0)
+	// {
+	// 	luaL_checktype(l, 1, LUA_TBOOLEAN);
+	// 	onlyEnabled = lua_toboolean(l, 1);
+	// }
+	// lua_pushinteger(l, luacon_controller->GetNumMenus(onlyEnabled));
+	lua_pushinteger(l, 0); // * TODO-REDO_UI
 	return 1;
 }
 
@@ -1254,12 +1243,11 @@ int luatpt_decorations_enable(lua_State* l)
 	int acount = lua_gettop(l);
 	if (acount == 0)
 	{
-		lua_pushinteger(l, luacon_model->GetDecoration());
+		lua_pushinteger(l, luacon_game->DrawDeco() ? 1 : 0);
 		return 1;
 	}
 	int decostate = luaL_checkint(l, 1);
-	luacon_model->SetDecoration(decostate==0?false:true);
-	luacon_model->UpdateQuickOptions();
+	luacon_game->DrawDeco(decostate);
 	return 0;
 }
 
@@ -1268,11 +1256,10 @@ int luatpt_heat(lua_State* l)
 	int acount = lua_gettop(l);
 	if (acount == 0)
 	{
-		lua_pushinteger(l, !luacon_sim->legacy_enable);
+		lua_pushinteger(l, luacon_game->LegacyHeat() ? 0 : 1);
 		return 1;
 	}
-	int heatstate = luaL_checkint(l, 1);
-	luacon_sim->legacy_enable = (heatstate==1?0:1);
+	luacon_game->LegacyHeat(luaL_checkint(l, 1) == 0);
 	return 0;
 }
 
@@ -1282,7 +1269,8 @@ int luatpt_cmode_set(lua_State* l)
 	if (cmode == 11)
 		cmode = 0;
 	if (cmode >= 0 && cmode <= 10)
-		luacon_controller->LoadRenderPreset(cmode);
+		// luacon_controller->LoadRenderPreset(cmode); // * TODO-REDO_UI
+		;
 	else
 		return luaL_error(l, "Invalid display mode");
 	return 0;
@@ -1290,121 +1278,122 @@ int luatpt_cmode_set(lua_State* l)
 
 int luatpt_setfire(lua_State* l)
 {
-	int firesize = luaL_optint(l, 2, 4);
-	float fireintensity = (float)luaL_optnumber(l, 1, 1.0f);
-	luacon_model->GetRenderer()->prepare_alpha(firesize, fireintensity);
+	// int firesize = luaL_optint(l, 2, 4); // * TODO-REDO_UI
+	// float fireintensity = (float)luaL_optnumber(l, 1, 1.0f);
+	// luacon_model->GetRenderer()->prepare_alpha(firesize, fireintensity);
 	return 0;
 }
 
 int luatpt_setdebug(lua_State* l)
 {
-	int debugFlags = luaL_optint(l, 1, 0);
-	luacon_controller->SetDebugFlags(debugFlags);
+	// int debugFlags = luaL_optint(l, 1, 0); // * TODO-REDO_UI
+	// luacon_controller->SetDebugFlags(debugFlags);
 	return 0;
 }
 
 int luatpt_setfpscap(lua_State* l)
 {
-	int acount = lua_gettop(l);
-	if (acount == 0)
-	{
-		lua_pushnumber(l, ui::Engine::Ref().FpsLimit);
-		return 1;
-	}
-	float fpscap = luaL_checknumber(l, 1);
-	if (fpscap < 2)
-		return luaL_error(l, "fps cap too small");
-	ui::Engine::Ref().FpsLimit = fpscap;
+	// int acount = lua_gettop(l);
+	// if (acount == 0)
+	// {
+	// 	lua_pushnumber(l, ui::Engine::Ref().FpsLimit);
+	// 	return 1;
+	// }
+	// float fpscap = luaL_checknumber(l, 1);
+	// if (fpscap < 2)
+	// 	return luaL_error(l, "fps cap too small");
+	// ui::Engine::Ref().FpsLimit = fpscap;
 	return 0;
 }
 
 int luatpt_setdrawcap(lua_State* l)
 {
-	int acount = lua_gettop(l);
-	if (acount == 0)
-	{
-		lua_pushinteger(l, ui::Engine::Ref().GetDrawingFrequencyLimit());
-		return 1;
-	}
-	int drawcap = luaL_checkint(l, 1);
-	if(drawcap < 0)
-		return luaL_error(l, "draw cap too small");
-	ui::Engine::Ref().SetDrawingFrequencyLimit(drawcap);
+	// int acount = lua_gettop(l);
+	// if (acount == 0)
+	// {
+	// 	lua_pushinteger(l, ui::Engine::Ref().GetDrawingFrequencyLimit());
+	// 	return 1;
+	// }
+	// int drawcap = luaL_checkint(l, 1);
+	// if(drawcap < 0)
+	// 	return luaL_error(l, "draw cap too small");
+	// ui::Engine::Ref().SetDrawingFrequencyLimit(drawcap);
 	return 0;
 }
 
 int luatpt_getscript(lua_State* l)
 {
-	int scriptID = luaL_checkinteger(l, 1);
-	const char *filename = luaL_checkstring(l, 2);
-	int runScript = luaL_optint(l, 3, 0);
-	int confirmPrompt = luaL_optint(l, 4, 1);
+	// int scriptID = luaL_checkinteger(l, 1);
+	// const char *filename = luaL_checkstring(l, 2);
+	// int runScript = luaL_optint(l, 3, 0);
+	// // int confirmPrompt = luaL_optint(l, 4, 1);
 
-	ByteString url = ByteString::Build(SCHEME "starcatcher.us/scripts/main.lua?get=", scriptID);
-	if (confirmPrompt && !ConfirmPrompt::Blocking("Do you want to install script?", url.FromUtf8(), "Install"))
-		return 0;
+	// ByteString url = ByteString::Build(SCHEME "starcatcher.us/scripts/main.lua?get=", scriptID);
+	// // if (confirmPrompt && !ConfirmPrompt::Blocking("Do you want to install script?", url.FromUtf8(), "Install"))
+	// // 	return 0;
 
-	int ret;
-	ByteString scriptData = http::Request::Simple(url, &ret);
-	if (!scriptData.size() || !filename)
-	{
-		return luaL_error(l, "Server did not return data");
-	}
-	if (ret != 200)
-	{
-		return luaL_error(l, http::StatusText(ret).ToUtf8().c_str());
-	}
+	// int ret;
+	// ByteString scriptData = http::Request::Simple(url, &ret);
+	// if (!scriptData.size() || !filename)
+	// {
+	// 	return luaL_error(l, "Server did not return data");
+	// }
+	// if (ret != 200)
+	// {
+	// 	return luaL_error(l, http::StatusText(ret).ToUtf8().c_str());
+	// }
 
-	if (scriptData.Contains("Invalid script ID"))
-	{
-		return luaL_error(l, "Invalid Script ID");
-	}
+	// if (scriptData.Contains("Invalid script ID"))
+	// {
+	// 	return luaL_error(l, "Invalid Script ID");
+	// }
 
-	FILE *outputfile = fopen(filename, "r");
-	if (outputfile)
-	{
-		fclose(outputfile);
-		outputfile = NULL;
-		if (!confirmPrompt || ConfirmPrompt::Blocking("File already exists, overwrite?", ByteString(filename).FromUtf8(), "Overwrite"))
-		{
-			outputfile = fopen(filename, "wb");
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
-		outputfile = fopen(filename, "wb");
-	}
-	if (!outputfile)
-	{
-		return luaL_error(l, "Unable to write to file");
-	}
+	// FILE *outputfile = fopen(filename, "r");
+	// if (outputfile)
+	// {
+	// 	fclose(outputfile);
+	// 	outputfile = NULL;
+	// 	// if (!confirmPrompt || ConfirmPrompt::Blocking("File already exists, overwrite?", ByteString(filename).FromUtf8(), "Overwrite"))
+	// 	if (true)
+	// 	{
+	// 		outputfile = fopen(filename, "wb");
+	// 	}
+	// 	else
+	// 	{
+	// 		return 0;
+	// 	}
+	// }
+	// else
+	// {
+	// 	outputfile = fopen(filename, "wb");
+	// }
+	// if (!outputfile)
+	// {
+	// 	return luaL_error(l, "Unable to write to file");
+	// }
 
-	fputs(scriptData.c_str(), outputfile);
-	fclose(outputfile);
-	outputfile = NULL;
-	if (runScript)
-	{
-		luaL_dostring(l, ByteString::Build("dofile('", filename, "')").c_str());
-	}
+	// fputs(scriptData.c_str(), outputfile);
+	// fclose(outputfile);
+	// outputfile = NULL;
+	// if (runScript)
+	// {
+	// 	luaL_dostring(l, ByteString::Build("dofile('", filename, "')").c_str());
+	// }
 
 	return 0;
 }
 
 int luatpt_setwindowsize(lua_State* l)
 {
-	int scale = luaL_optint(l,1,1);
-	int kiosk = luaL_optint(l,2,0);
-	// TODO: handle this the same way as it's handled in PowderToySDL.cpp
-	//   > maybe bind the maximum allowed scale to screen size somehow
-	if (scale < 1 || scale > 10) scale = 1;
-	if (kiosk!=1) kiosk = 0;
-	Client::Ref().SetPref("Scale", scale);
-	ui::Engine::Ref().SetScale(scale);
-	ui::Engine::Ref().SetFullscreen(kiosk);
+	// int scale = luaL_optint(l,1,1);
+	// int kiosk = luaL_optint(l,2,0);
+	// // TODO: handle this the same way as it's handled in PowderToySDL.cpp
+	// //   > maybe bind the maximum allowed scale to screen size somehow
+	// if (scale < 1 || scale > 10) scale = 1;
+	// if (kiosk!=1) kiosk = 0;
+	// Client::Ref().SetPref("Scale", scale);
+	// ui::Engine::Ref().SetScale(scale);
+	// ui::Engine::Ref().SetFullscreen(kiosk); // * TODO-REDO_UI
 	return 0;
 }
 
@@ -1412,63 +1401,65 @@ int screenshotIndex = 0;
 
 int luatpt_screenshot(lua_State* l)
 {
-	int captureUI = luaL_optint(l, 1, 0);
-	int fileType = luaL_optint(l, 2, 0);
-	std::vector<char> data;
-	if(captureUI)
-	{
-		VideoBuffer screenshot(ui::Engine::Ref().g->DumpFrame());
-		if(fileType == 1) {
-			data = format::VideoBufferToBMP(screenshot);
-		} else if(fileType == 2) {
-			data = format::VideoBufferToPPM(screenshot);
-		} else {
-			data = format::VideoBufferToPNG(screenshot);
-		}
-	}
-	else
-	{
-		VideoBuffer screenshot(luacon_ren->DumpFrame());
-		if(fileType == 1) {
-			data = format::VideoBufferToBMP(screenshot);
-		} else if(fileType == 2) {
-			data = format::VideoBufferToPPM(screenshot);
-		} else {
-			data = format::VideoBufferToPNG(screenshot);
-		}
-	}
-	ByteString filename = ByteString::Build("screenshot_", Format::Width(screenshotIndex++, 6));
-	if(fileType == 1) {
-		filename += ".bmp";
-	} else if(fileType == 2) {
-		filename += ".ppm";
-	} else {
-		filename += ".png";
-	}
-	Client::Ref().WriteFile(data, filename);
-	lua_pushstring(l, filename.c_str());
-	return 1;
+	// int captureUI = luaL_optint(l, 1, 0);
+	// int fileType = luaL_optint(l, 2, 0);
+	// std::vector<char> data;
+	// if(captureUI)
+	// {
+	// 	VideoBuffer screenshot(ui::Engine::Ref().g->DumpFrame());
+	// 	if(fileType == 1) {
+	// 		data = format::VideoBufferToBMP(screenshot);
+	// 	} else if(fileType == 2) {
+	// 		data = format::VideoBufferToPPM(screenshot);
+	// 	} else {
+	// 		data = format::VideoBufferToPNG(screenshot);
+	// 	}
+	// }
+	// else
+	// {
+	// 	VideoBuffer screenshot(luacon_ren->DumpFrame());
+	// 	if(fileType == 1) {
+	// 		data = format::VideoBufferToBMP(screenshot);
+	// 	} else if(fileType == 2) {
+	// 		data = format::VideoBufferToPPM(screenshot);
+	// 	} else {
+	// 		data = format::VideoBufferToPNG(screenshot);
+	// 	}
+	// }
+	// ByteString filename = ByteString::Build("screenshot_", Format::Width(screenshotIndex++, 6));
+	// if(fileType == 1) {
+	// 	filename += ".bmp";
+	// } else if(fileType == 2) {
+	// 	filename += ".ppm";
+	// } else {
+	// 	filename += ".png";
+	// }
+	// Client::Ref().WriteFile(data, filename);
+	// lua_pushstring(l, filename.c_str());
+	// return 1; // * TODO-REDO_UI
+	return 0;
 }
 
 int luatpt_record(lua_State* l)
 {
-	if (!lua_isboolean(l, -1))
-		return luaL_typerror(l, 1, lua_typename(l, LUA_TBOOLEAN));
-	bool record = lua_toboolean(l, -1);
-	int recordingFolder = luacon_controller->Record(record);
-	lua_pushinteger(l, recordingFolder);
-	return 1;
+	// if (!lua_isboolean(l, -1))
+	// 	return luaL_typerror(l, 1, lua_typename(l, LUA_TBOOLEAN));
+	// bool record = lua_toboolean(l, -1);
+	// int recordingFolder = luacon_controller->Record(record);
+	// lua_pushinteger(l, recordingFolder);
+	// return 1; // * TODO-REDO_UI
+	return 0;
 }
 
 int luatpt_perfectCircle(lua_State* l)
 {
-	if (!lua_gettop(l))
-	{
-		lua_pushboolean(l, luacon_model->GetPerfectCircle());
-		return 1;
-	}
-	luaL_checktype(l, 1, LUA_TBOOLEAN);
-	luacon_model->SetPerfectCircle(lua_toboolean(l, 1));
+	// if (!lua_gettop(l))
+	// {
+	// 	lua_pushboolean(l, luacon_model->GetPerfectCircle());
+	// 	return 1;
+	// }
+	// luaL_checktype(l, 1, LUA_TBOOLEAN);
+	// luacon_model->SetPerfectCircle(lua_toboolean(l, 1)); // * TODO-REDO_UI
 	return 0;
 }
 

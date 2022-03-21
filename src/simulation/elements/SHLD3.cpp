@@ -6,7 +6,7 @@ void Element::Element_SHLD3()
 {
 	Identifier = "DEFAULT_PT_SHLD3";
 	Name = "SHD3";
-	Colour = PIXPACK(0x444444);
+	Colour = 0x444444;
 	MenuVisible = 0;
 	MenuSection = SC_CRACKER2;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_SHLD3()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "Shield lvl 3.";
 
 	Properties = TYPE_SOLID|PROP_LIFE_DEC;
 

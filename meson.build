@@ -50,10 +50,6 @@ else
 	copt_platform = 'lin'
 endif
 
-if get_option('ogli') or get_option('oglr')
-	error('OpenGL features are currently unavailable')
-endif
-
 uopt_static = get_option('static')
 use_tpt_libs = 'no'
 tpt_libs_vtag = 'v20220217170412'
@@ -156,6 +152,9 @@ if copt_msvc
 		'-DUNICODE',
 		'-D_UNICODE',
 	]
+	if cpp_compiler.version().version_compare('<19.30')
+		args_msvc += [ '/experimental:newLambdaProcessor' ]
+	endif
 	if copt_64bit
 		message('SSE explicitly configured but unavailable in msvc targeting 64-bit machines')
 	else
@@ -242,6 +241,7 @@ endif
 
 if copt_platform == 'win'
 	other_dep = tpt_libs.get_variable('other_dep')
+	other_dep = [ other_dep, cpp_compiler.find_library('shlwapi') ]
 	args_ccomp_win = [ '-D_WIN32_WINNT=0x0501' ]
 	project_c_args   += args_ccomp_win
 	project_cpp_args += args_ccomp_win
@@ -290,9 +290,6 @@ conf_data.set('X86_SSE2', uopt_x86_sse_level >= 20)
 conf_data.set('X86_SSE', uopt_x86_sse_level >= 10)
 conf_data.set('NATIVE', uopt_native)
 conf_data.set('_64BIT', copt_64bit)
-conf_data.set('OGLI', get_option('ogli'))
-conf_data.set('OGLR', get_option('oglr'))
-conf_data.set('PIX32OGL', get_option('ogli'))
 conf_data.set('BETA', get_option('beta'))
 conf_data.set('NO_INSTALL_CHECK', not get_option('install_check'))
 conf_data.set('IGNORE_UPDATES', get_option('ignore_updates'))
@@ -312,9 +309,12 @@ else
 endif
 
 resources_files = []
+powder_files = []
+render_files = []
+font_files = []
 
-subdir('src')
 subdir('data')
+subdir('src')
 subdir('resources')
 
 if get_option('build_powder')
@@ -341,38 +341,38 @@ if get_option('build_powder')
 	)
 endif
 
-if get_option('build_render')
-	render_deps = [
-		threads_dep,
-		zlib_dep,
-	]
-	executable(
-		'render',
-		sources: render_files,
-		include_directories: [ project_inc, render_inc ],
-		c_args: project_c_args,
-		cpp_args: project_cpp_args,
-		link_args: project_link_args,
-		dependencies: render_deps,
-	)
-endif
+#if get_option('build_render')
+#	render_deps = [
+#		threads_dep,
+#		zlib_dep,
+#	]
+#	executable(
+#		'render',
+#		sources: render_files,
+#		include_directories: [ project_inc, render_inc ],
+#		c_args: project_c_args,
+#		cpp_args: project_cpp_args,
+#		link_args: project_link_args,
+#		dependencies: render_deps,
+#	)
+#endif
 
-if get_option('build_font')
-	font_deps = [
-		threads_dep,
-		zlib_dep,
-		sdl2_dep,
-	]
-	if copt_platform == 'win'
-		font_deps += other_dep
-	endif
-	executable(
-		'font',
-		sources: font_files,
-		include_directories: [ project_inc, font_inc ],
-		c_args: project_c_args,
-		cpp_args: project_cpp_args,
-		link_args: project_link_args,
-		dependencies: font_deps,
-	)
-endif
+#if get_option('build_font')
+#	font_deps = [
+#		threads_dep,
+#		zlib_dep,
+#		sdl2_dep,
+#	]
+#	if copt_platform == 'win'
+#		font_deps += other_dep
+#	endif
+#	executable(
+#		'font',
+#		sources: font_files,
+#		include_directories: [ project_inc, font_inc ],
+#		c_args: project_c_args,
+#		cpp_args: project_cpp_args,
+#		link_args: project_link_args,
+#		dependencies: font_deps,
+#	)
+#endif

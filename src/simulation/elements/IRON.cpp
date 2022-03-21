@@ -6,7 +6,7 @@ void Element::Element_IRON()
 {
 	Identifier = "DEFAULT_PT_IRON";
 	Name = "IRON";
-	Colour = PIXPACK(0x707070);
+	Colour = 0x707070;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_IRON()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Rusts with salt, can be used for electrolysis of WATR.";
 
 	Properties = TYPE_SOLID|PROP_CONDUCTS|PROP_LIFE_DEC|PROP_HOT_GLOW;
 

@@ -7,7 +7,7 @@ void Element::Element_GEL()
 {
 	Identifier = "DEFAULT_PT_GEL";
 	Name = "GEL";
-	Colour = PIXPACK(0xFF9900);
+	Colour = 0xFF9900;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_GEL()
 
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
-	Description = "Gel. A liquid with variable viscosity and heat conductivity.";
 
 	Properties = TYPE_LIQUID|PROP_LIFE_DEC|PROP_NEUTPENETRATE;
 

@@ -8,7 +8,7 @@ void Element::Element_CRMC()
 {
 	Identifier = "DEFAULT_PT_CRMC";
 	Name = "CRMC";
-	Colour = PIXPACK(0xD6D1D4);
+	Colour = 0xD6D1D4;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_CRMC()
 	Weight = 100;
 
 	HeatConduct = 35;
-	Description = "Ceramic. Gets stronger under pressure.";
 
 	Properties = TYPE_SOLID | PROP_NEUTPASS;
 

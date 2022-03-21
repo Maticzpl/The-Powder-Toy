@@ -8,6 +8,7 @@
 #else
 #include <strings.h>
 #endif
+#include <cassert>
 
 #include "Air.h"
 #include "Config.h"
@@ -23,14 +24,15 @@
 #include "SimulationData.h"
 #include "GOLString.h"
 
-#include "graphics/Renderer.h"
+#include "graphics/SimulationRenderer.h"
+#include "graphics/Pix.h"
 
-#include "client/GameSave.h"
+#include "GameSave.h"
 #include "common/tpt-compat.h"
 #include "common/tpt-minmax.h"
 #include "common/tpt-rand.h"
 #include "common/tpt-thread-local.h"
-#include "gui/game/Brush.h"
+// #include "gui/game/Brush.h"
 
 #ifdef LUACONSOLE
 #include "lua/LuaScriptInterface.h"
@@ -50,20 +52,8 @@ int Simulation::Load(const GameSave * save, bool includePressure)
 
 int Simulation::Load(const GameSave * originalSave, bool includePressure, int fullX, int fullY)
 {
-	if (!originalSave)
-		return 1;
+	assert(originalSave && !originalSave->Collapsed());
 	auto save = std::unique_ptr<GameSave>(new GameSave(*originalSave));
-	try
-	{
-		save->Expand();
-	}
-	catch (const ParseException &e)
-	{
-#ifdef LUACONSOLE
-		luacon_ci->SetLastError(ByteString(e.what()).FromUtf8());
-#endif
-		return 1;
-	}
 
 	//Align to blockMap
 	int blockX = (fullX + CELL/2)/CELL;
@@ -380,12 +370,12 @@ int Simulation::Load(const GameSave * originalSave, bool includePressure, int fu
 	return 0;
 }
 
-GameSave * Simulation::Save(bool includePressure)
+std::unique_ptr<GameSave> Simulation::Save(bool includePressure)
 {
 	return Save(includePressure, 0, 0, XRES-1, YRES-1);
 }
 
-GameSave * Simulation::Save(bool includePressure, int fullX, int fullY, int fullX2, int fullY2)
+std::unique_ptr<GameSave> Simulation::Save(bool includePressure, int fullX, int fullY, int fullX2, int fullY2)
 {
 	int blockX, blockY, blockX2, blockY2, blockW, blockH;
 	//Normalise incoming coords
@@ -413,7 +403,7 @@ GameSave * Simulation::Save(bool includePressure, int fullX, int fullY, int full
 	blockW = blockX2-blockX;
 	blockH = blockY2-blockY;
 
-	GameSave * newSave = new GameSave(blockW, blockH);
+	auto newSave = std::make_unique<GameSave>(blockW, blockH);
 
 	int storedParts = 0;
 	int elementCount[PT_NUM];
@@ -535,7 +525,7 @@ GameSave * Simulation::Save(bool includePressure, int fullX, int fullY, int full
 			newSave->stkm.fanFigh.push_back(i);
 	}
 
-	SaveSimOptions(newSave);
+	SaveSimOptions(newSave.get());
 	newSave->pmapbits = PMAPBITS;
 	return newSave;
 }
@@ -1026,467 +1016,269 @@ void Simulation::SetEdgeMode(int newEdgeMode)
 	}
 }
 
-#ifndef RENDERER
-void Simulation::ApplyDecoration(int x, int y, int colR_, int colG_, int colB_, int colA_, int mode)
-{
-	int rp;
-	float tr, tg, tb, ta, colR = float(colR_), colG = float(colG_), colB = float(colB_), colA = float(colA_);
-	float strength = 0.01f;
-	rp = pmap[y][x];
-	if (!rp)
-		rp = photons[y][x];
-	if (!rp)
-		return;
+// #ifndef RENDERER
+// // * TODO-REDO_UI: get rid of this
+// void Simulation::ApplyDecoration(int x, int y, int colR_, int colG_, int colB_, int colA_, int mode)
+// {
+// 	int rp;
+// 	float tr, tg, tb, ta, colR = float(colR_), colG = float(colG_), colB = float(colB_), colA = float(colA_);
+// 	float strength = 0.01f;
+// 	rp = pmap[y][x];
+// 	if (!rp)
+// 		rp = photons[y][x];
+// 	if (!rp)
+// 		return;
 
-	ta = float((parts[ID(rp)].dcolour>>24)&0xFF);
-	tr = float((parts[ID(rp)].dcolour>>16)&0xFF);
-	tg = float((parts[ID(rp)].dcolour>>8)&0xFF);
-	tb = float((parts[ID(rp)].dcolour)&0xFF);
+// 	ta = float((parts[ID(rp)].dcolour>>24)&0xFF);
+// 	tr = float((parts[ID(rp)].dcolour>>16)&0xFF);
+// 	tg = float((parts[ID(rp)].dcolour>>8)&0xFF);
+// 	tb = float((parts[ID(rp)].dcolour)&0xFF);
 
-	ta /= 255.0f; tr /= 255.0f; tg /= 255.0f; tb /= 255.0f;
-	colR /= 255.0f; colG /= 255.0f; colB /= 255.0f; colA /= 255.0f;
+// 	ta /= 255.0f; tr /= 255.0f; tg /= 255.0f; tb /= 255.0f;
+// 	colR /= 255.0f; colG /= 255.0f; colB /= 255.0f; colA /= 255.0f;
 
-	if (mode == DECO_DRAW)
-	{
-		ta = colA;
-		tr = colR;
-		tg = colG;
-		tb = colB;
-	}
-	else if (mode == DECO_CLEAR)
-	{
-		ta = tr = tg = tb = 0.0f;
-	}
-	else if (mode == DECO_ADD)
-	{
-		//ta += (colA*strength)*colA;
-		tr += (colR*strength)*colA;
-		tg += (colG*strength)*colA;
-		tb += (colB*strength)*colA;
-	}
-	else if (mode == DECO_SUBTRACT)
-	{
-		//ta -= (colA*strength)*colA;
-		tr -= (colR*strength)*colA;
-		tg -= (colG*strength)*colA;
-		tb -= (colB*strength)*colA;
-	}
-	else if (mode == DECO_MULTIPLY)
-	{
-		tr *= 1.0f+(colR*strength)*colA;
-		tg *= 1.0f+(colG*strength)*colA;
-		tb *= 1.0f+(colB*strength)*colA;
-	}
-	else if (mode == DECO_DIVIDE)
-	{
-		tr /= 1.0f+(colR*strength)*colA;
-		tg /= 1.0f+(colG*strength)*colA;
-		tb /= 1.0f+(colB*strength)*colA;
-	}
-	else if (mode == DECO_SMUDGE)
-	{
-		if (x >= CELL && x < XRES-CELL && y >= CELL && y < YRES-CELL)
-		{
-			float tas = 0.0f, trs = 0.0f, tgs = 0.0f, tbs = 0.0f;
+// 	if (mode == DECO_DRAW)
+// 	{
+// 		ta = colA;
+// 		tr = colR;
+// 		tg = colG;
+// 		tb = colB;
+// 	}
+// 	else if (mode == DECO_CLEAR)
+// 	{
+// 		ta = tr = tg = tb = 0.0f;
+// 	}
+// 	else if (mode == DECO_ADD)
+// 	{
+// 		//ta += (colA*strength)*colA;
+// 		tr += (colR*strength)*colA;
+// 		tg += (colG*strength)*colA;
+// 		tb += (colB*strength)*colA;
+// 	}
+// 	else if (mode == DECO_SUBTRACT)
+// 	{
+// 		//ta -= (colA*strength)*colA;
+// 		tr -= (colR*strength)*colA;
+// 		tg -= (colG*strength)*colA;
+// 		tb -= (colB*strength)*colA;
+// 	}
+// 	else if (mode == DECO_MULTIPLY)
+// 	{
+// 		tr *= 1.0f+(colR*strength)*colA;
+// 		tg *= 1.0f+(colG*strength)*colA;
+// 		tb *= 1.0f+(colB*strength)*colA;
+// 	}
+// 	else if (mode == DECO_DIVIDE)
+// 	{
+// 		tr /= 1.0f+(colR*strength)*colA;
+// 		tg /= 1.0f+(colG*strength)*colA;
+// 		tb /= 1.0f+(colB*strength)*colA;
+// 	}
+// 	else if (mode == DECO_SMUDGE)
+// 	{
+// 		if (x >= CELL && x < XRES-CELL && y >= CELL && y < YRES-CELL)
+// 		{
+// 			float tas = 0.0f, trs = 0.0f, tgs = 0.0f, tbs = 0.0f;
 
-			int rx, ry;
-			float num = 0;
-			for (rx=-2; rx<3; rx++)
-				for (ry=-2; ry<3; ry++)
-				{
-					if (abs(rx)+abs(ry) > 2 && TYP(pmap[y+ry][x+rx]) && parts[ID(pmap[y+ry][x+rx])].dcolour)
-					{
-						Particle part = parts[ID(pmap[y+ry][x+rx])];
-						num += 1.0f;
-						float pa = ((float)((part.dcolour>>24)&0xFF)) / 255.f;
-						float pr = ((float)((part.dcolour>>16)&0xFF)) / 255.f;
-						float pg = ((float)((part.dcolour>> 8)&0xFF)) / 255.f;
-						float pb = ((float)((part.dcolour    )&0xFF)) / 255.f;
-						switch (deco_space)
-						{
-						case 0: // sRGB
-							pa = (pa <= 0.04045f) ? (pa / 12.92f) : pow((pa + 0.055f) / 1.055f, 2.4f);
-							pr = (pr <= 0.04045f) ? (pr / 12.92f) : pow((pr + 0.055f) / 1.055f, 2.4f);
-							pg = (pg <= 0.04045f) ? (pg / 12.92f) : pow((pg + 0.055f) / 1.055f, 2.4f);
-							pb = (pb <= 0.04045f) ? (pb / 12.92f) : pow((pb + 0.055f) / 1.055f, 2.4f);
-							break;
+// 			int rx, ry;
+// 			float num = 0;
+// 			for (rx=-2; rx<3; rx++)
+// 				for (ry=-2; ry<3; ry++)
+// 				{
+// 					if (abs(rx)+abs(ry) > 2 && TYP(pmap[y+ry][x+rx]) && parts[ID(pmap[y+ry][x+rx])].dcolour)
+// 					{
+// 						Particle part = parts[ID(pmap[y+ry][x+rx])];
+// 						num += 1.0f;
+// 						float pa = ((float)((part.dcolour>>24)&0xFF)) / 255.f;
+// 						float pr = ((float)((part.dcolour>>16)&0xFF)) / 255.f;
+// 						float pg = ((float)((part.dcolour>> 8)&0xFF)) / 255.f;
+// 						float pb = ((float)((part.dcolour    )&0xFF)) / 255.f;
+// 						switch (deco_space)
+// 						{
+// 						case 0: // sRGB
+// 							pa = (pa <= 0.04045f) ? (pa / 12.92f) : pow((pa + 0.055f) / 1.055f, 2.4f);
+// 							pr = (pr <= 0.04045f) ? (pr / 12.92f) : pow((pr + 0.055f) / 1.055f, 2.4f);
+// 							pg = (pg <= 0.04045f) ? (pg / 12.92f) : pow((pg + 0.055f) / 1.055f, 2.4f);
+// 							pb = (pb <= 0.04045f) ? (pb / 12.92f) : pow((pb + 0.055f) / 1.055f, 2.4f);
+// 							break;
 
-						case 1: // linear
-							break;
+// 						case 1: // linear
+// 							break;
 
-						case 2: // Gamma = 2.2
-							pa = pow(pa, 2.2f);
-							pr = pow(pr, 2.2f);
-							pg = pow(pg, 2.2f);
-							pb = pow(pb, 2.2f);
-							break;
+// 						case 2: // Gamma = 2.2
+// 							pa = pow(pa, 2.2f);
+// 							pr = pow(pr, 2.2f);
+// 							pg = pow(pg, 2.2f);
+// 							pb = pow(pb, 2.2f);
+// 							break;
 
-						case 3: // Gamma = 1.8
-							pa = pow(pa, 1.8f);
-							pr = pow(pr, 1.8f);
-							pg = pow(pg, 1.8f);
-							pb = pow(pb, 1.8f);
-							break;
-						}
-						tas += pa;
-						trs += pr;
-						tgs += pg;
-						tbs += pb;
-					}
-				}
-			if (num == 0)
-				return;
-			ta = tas / num;
-			tr = trs / num;
-			tg = tgs / num;
-			tb = tbs / num;
-			switch (deco_space)
-			{
-			case 0: // sRGB
-				ta = (ta <= 0.0031308f) ? (ta * 12.92f) : (1.055f * pow(ta, 1.f / 2.4f) - 0.055f);
-				tr = (tr <= 0.0031308f) ? (tr * 12.92f) : (1.055f * pow(tr, 1.f / 2.4f) - 0.055f);
-				tg = (tg <= 0.0031308f) ? (tg * 12.92f) : (1.055f * pow(tg, 1.f / 2.4f) - 0.055f);
-				tb = (tb <= 0.0031308f) ? (tb * 12.92f) : (1.055f * pow(tb, 1.f / 2.4f) - 0.055f);
-				break;
+// 						case 3: // Gamma = 1.8
+// 							pa = pow(pa, 1.8f);
+// 							pr = pow(pr, 1.8f);
+// 							pg = pow(pg, 1.8f);
+// 							pb = pow(pb, 1.8f);
+// 							break;
+// 						}
+// 						tas += pa;
+// 						trs += pr;
+// 						tgs += pg;
+// 						tbs += pb;
+// 					}
+// 				}
+// 			if (num == 0)
+// 				return;
+// 			ta = tas / num;
+// 			tr = trs / num;
+// 			tg = tgs / num;
+// 			tb = tbs / num;
+// 			switch (deco_space)
+// 			{
+// 			case 0: // sRGB
+// 				ta = (ta <= 0.0031308f) ? (ta * 12.92f) : (1.055f * pow(ta, 1.f / 2.4f) - 0.055f);
+// 				tr = (tr <= 0.0031308f) ? (tr * 12.92f) : (1.055f * pow(tr, 1.f / 2.4f) - 0.055f);
+// 				tg = (tg <= 0.0031308f) ? (tg * 12.92f) : (1.055f * pow(tg, 1.f / 2.4f) - 0.055f);
+// 				tb = (tb <= 0.0031308f) ? (tb * 12.92f) : (1.055f * pow(tb, 1.f / 2.4f) - 0.055f);
+// 				break;
 
-			case 1: // linear
-				break;
+// 			case 1: // linear
+// 				break;
 
-			case 2: // Gamma = 2.2
-				ta = pow(ta, 1.f / 2.2f);
-				tr = pow(tr, 1.f / 2.2f);
-				tg = pow(tg, 1.f / 2.2f);
-				tb = pow(tb, 1.f / 2.2f);
-				break;
+// 			case 2: // Gamma = 2.2
+// 				ta = pow(ta, 1.f / 2.2f);
+// 				tr = pow(tr, 1.f / 2.2f);
+// 				tg = pow(tg, 1.f / 2.2f);
+// 				tb = pow(tb, 1.f / 2.2f);
+// 				break;
 
-			case 3: // Gamma = 1.8
-				ta = pow(ta, 1.f / 1.8f);
-				tr = pow(tr, 1.f / 1.8f);
-				tg = pow(tg, 1.f / 1.8f);
-				tb = pow(tb, 1.f / 1.8f);
-				break;
-			}
-			if (!parts[ID(rp)].dcolour)
-				ta -= 3/255.0f;
-		}
-	}
+// 			case 3: // Gamma = 1.8
+// 				ta = pow(ta, 1.f / 1.8f);
+// 				tr = pow(tr, 1.f / 1.8f);
+// 				tg = pow(tg, 1.f / 1.8f);
+// 				tb = pow(tb, 1.f / 1.8f);
+// 				break;
+// 			}
+// 			if (!parts[ID(rp)].dcolour)
+// 				ta -= 3/255.0f;
+// 		}
+// 	}
 
-	ta *= 255.0f; tr *= 255.0f; tg *= 255.0f; tb *= 255.0f;
-	ta += .5f; tr += .5f; tg += .5f; tb += .5f;
+// 	ta *= 255.0f; tr *= 255.0f; tg *= 255.0f; tb *= 255.0f;
+// 	ta += .5f; tr += .5f; tg += .5f; tb += .5f;
 
-	colA_ = int(ta);
-	colR_ = int(tr);
-	colG_ = int(tg);
-	colB_ = int(tb);
+// 	colA_ = int(ta);
+// 	colR_ = int(tr);
+// 	colG_ = int(tg);
+// 	colB_ = int(tb);
 
-	if(colA_ > 255)
-		colA_ = 255;
-	else if(colA_ < 0)
-		colA_ = 0;
-	if(colR_ > 255)
-		colR_ = 255;
-	else if(colR_ < 0)
-		colR_ = 0;
-	if(colG_ > 255)
-		colG_ = 255;
-	else if(colG_ < 0)
-		colG_ = 0;
-	if(colB_ > 255)
-		colB_ = 255;
-	else if(colB_ < 0)
-		colB_ = 0;
-	parts[ID(rp)].dcolour = ((colA_<<24)|(colR_<<16)|(colG_<<8)|colB_);
-}
+// 	if(colA_ > 255)
+// 		colA_ = 255;
+// 	else if(colA_ < 0)
+// 		colA_ = 0;
+// 	if(colR_ > 255)
+// 		colR_ = 255;
+// 	else if(colR_ < 0)
+// 		colR_ = 0;
+// 	if(colG_ > 255)
+// 		colG_ = 255;
+// 	else if(colG_ < 0)
+// 		colG_ = 0;
+// 	if(colB_ > 255)
+// 		colB_ = 255;
+// 	else if(colB_ < 0)
+// 		colB_ = 0;
+// 	parts[ID(rp)].dcolour = ((colA_<<24)|(colR_<<16)|(colG_<<8)|colB_);
+// }
 
-void Simulation::ApplyDecorationPoint(int positionX, int positionY, int colR, int colG, int colB, int colA, int mode, Brush * cBrush)
-{
-	if(cBrush)
-	{
-		int radiusX = cBrush->GetRadius().X, radiusY = cBrush->GetRadius().Y, sizeX = cBrush->GetSize().X, sizeY = cBrush->GetSize().Y;
-		unsigned char *bitmap = cBrush->GetBitmap();
+// * TODO-REDO_UI: get rid of this
+// bool Simulation::ColorCompare(Renderer *ren, int x, int y, int replaceR, int replaceG, int replaceB)
+// {
+// 	pixel pix = ren->vid[x+y*WINDOWW];
+// 	int r = PIXR(pix);
+// 	int g = PIXG(pix);
+// 	int b = PIXB(pix);
+// 	int diff = std::abs(replaceR-r) + std::abs(replaceG-g) + std::abs(replaceB-b);
+// 	return diff < 15;
+// 	return false;
+// }
 
-		for(int y = 0; y < sizeY; y++)
-		{
-			for(int x = 0; x < sizeX; x++)
-			{
-				if(bitmap[(y*sizeX)+x] && (positionX+(x-radiusX) >= 0 && positionY+(y-radiusY) >= 0 && positionX+(x-radiusX) < XRES && positionY+(y-radiusY) < YRES))
-				{
-					ApplyDecoration(positionX+(x-radiusX), positionY+(y-radiusY), colR, colG, colB, colA, mode);
-				}
-			}
-		}
-	}
-}
+// * TODO-REDO_UI: get rid of this
+// void Simulation::ApplyDecorationFill(Renderer *ren, int x, int y, int colR, int colG, int colB, int colA, int replaceR, int replaceG, int replaceB)
+// {
+// 	int x1, x2;
+// 	char *bitmap = (char*)malloc(XRES*YRES); //Bitmap for checking
+// 	if (!bitmap)
+// 		return;
+// 	memset(bitmap, 0, XRES*YRES);
 
-void Simulation::ApplyDecorationLine(int x1, int y1, int x2, int y2, int colR, int colG, int colB, int colA, int mode, Brush * cBrush)
-{
-	bool reverseXY = abs(y2-y1) > abs(x2-x1);
-	int x, y, dx, dy, sy, rx = 0, ry = 0;
-	float e = 0.0f, de;
+// 	if (!ColorCompare(ren, x, y, replaceR, replaceG, replaceB)) {
+// 		free(bitmap);
+// 		return;
+// 	}
 
-	if(cBrush)
-	{
-		rx = cBrush->GetRadius().X;
-		ry = cBrush->GetRadius().Y;
-	}
-
-	if (reverseXY)
-	{
-		y = x1;
-		x1 = y1;
-		y1 = y;
-		y = x2;
-		x2 = y2;
-		y2 = y;
-	}
-	if (x1 > x2)
-	{
-		y = x1;
-		x1 = x2;
-		x2 = y;
-		y = y1;
-		y1 = y2;
-		y2 = y;
-	}
-	dx = x2 - x1;
-	dy = abs(y2 - y1);
-	if (dx)
-		de = dy/(float)dx;
-	else
-		de = 0.0f;
-	y = y1;
-	sy = (y1<y2) ? 1 : -1;
-	for (x=x1; x<=x2; x++)
-	{
-		if (reverseXY)
-			ApplyDecorationPoint(y, x, colR, colG, colB, colA, mode, cBrush);
-		else
-			ApplyDecorationPoint(x, y, colR, colG, colB, colA, mode, cBrush);
-		e += de;
-		if (e >= 0.5f)
-		{
-			y += sy;
-			if (!(rx+ry))
-			{
-				if (reverseXY)
-					ApplyDecorationPoint(y, x, colR, colG, colB, colA, mode, cBrush);
-				else
-					ApplyDecorationPoint(x, y, colR, colG, colB, colA, mode, cBrush);
-			}
-			e -= 1.0f;
-		}
-	}
-}
-
-void Simulation::ApplyDecorationBox(int x1, int y1, int x2, int y2, int colR, int colG, int colB, int colA, int mode)
-{
-	int i, j;
-
-	if (x1>x2)
-	{
-		i = x2;
-		x2 = x1;
-		x1 = i;
-	}
-	if (y1>y2)
-	{
-		j = y2;
-		y2 = y1;
-		y1 = j;
-	}
-	for (j=y1; j<=y2; j++)
-		for (i=x1; i<=x2; i++)
-			ApplyDecoration(i, j, colR, colG, colB, colA, mode);
-}
-
-bool Simulation::ColorCompare(Renderer *ren, int x, int y, int replaceR, int replaceG, int replaceB)
-{
-	pixel pix = ren->vid[x+y*WINDOWW];
-	int r = PIXR(pix);
-	int g = PIXG(pix);
-	int b = PIXB(pix);
-	int diff = std::abs(replaceR-r) + std::abs(replaceG-g) + std::abs(replaceB-b);
-	return diff < 15;
-}
-
-void Simulation::ApplyDecorationFill(Renderer *ren, int x, int y, int colR, int colG, int colB, int colA, int replaceR, int replaceG, int replaceB)
-{
-	int x1, x2;
-	char *bitmap = (char*)malloc(XRES*YRES); //Bitmap for checking
-	if (!bitmap)
-		return;
-	memset(bitmap, 0, XRES*YRES);
-
-	if (!ColorCompare(ren, x, y, replaceR, replaceG, replaceB)) {
-		free(bitmap);
-		return;
-	}
-
-	try
-	{
-		CoordStack& cs = getCoordStackSingleton();
-		cs.clear();
+// 	try
+// 	{
+// 		CoordStack& cs = getCoordStackSingleton();
+// 		cs.clear();
 		
-		cs.push(x, y);
-		do
-		{
-			cs.pop(x, y);
-			x1 = x2 = x;
-			// go left as far as possible
-			while (x1>0)
-			{
-				if (bitmap[(x1-1)+y*XRES] || !ColorCompare(ren, x1-1, y, replaceR, replaceG, replaceB))
-				{
-					break;
-				}
-				x1--;
-			}
-			// go right as far as possible
-			while (x2<XRES-1)
-			{
-				if (bitmap[(x1+1)+y*XRES] || !ColorCompare(ren, x2+1, y, replaceR, replaceG, replaceB))
-				{
-					break;
-				}
-				x2++;
-			}
-			// fill span
-			for (x=x1; x<=x2; x++)
-			{
-				ApplyDecoration(x, y, colR, colG, colB, colA, DECO_DRAW);
-				bitmap[x+y*XRES] = 1;
-			}
+// 		cs.push(x, y);
+// 		do
+// 		{
+// 			cs.pop(x, y);
+// 			x1 = x2 = x;
+// 			// go left as far as possible
+// 			while (x1>0)
+// 			{
+// 				if (bitmap[(x1-1)+y*XRES] || !ColorCompare(ren, x1-1, y, replaceR, replaceG, replaceB))
+// 				{
+// 					break;
+// 				}
+// 				x1--;
+// 			}
+// 			// go right as far as possible
+// 			while (x2<XRES-1)
+// 			{
+// 				if (bitmap[(x1+1)+y*XRES] || !ColorCompare(ren, x2+1, y, replaceR, replaceG, replaceB))
+// 				{
+// 					break;
+// 				}
+// 				x2++;
+// 			}
+// 			// fill span
+// 			for (x=x1; x<=x2; x++)
+// 			{
+// 				ApplyDecoration(x, y, colR, colG, colB, colA, DECO_DRAW);
+// 				bitmap[x+y*XRES] = 1;
+// 			}
 
-			if (y >= 1)
-				for (x=x1; x<=x2; x++)
-					if (!bitmap[x+(y-1)*XRES] && ColorCompare(ren, x, y-1, replaceR, replaceG, replaceB))
-						cs.push(x, y-1);
+// 			if (y >= 1)
+// 				for (x=x1; x<=x2; x++)
+// 					if (!bitmap[x+(y-1)*XRES] && ColorCompare(ren, x, y-1, replaceR, replaceG, replaceB))
+// 						cs.push(x, y-1);
 
-			if (y < YRES-1)
-				for (x=x1; x<=x2; x++)
-					if (!bitmap[x+(y+1)*XRES] && ColorCompare(ren, x, y+1, replaceR, replaceG, replaceB))
-						cs.push(x, y+1);
-		} while (cs.getSize() > 0);
-	}
-	catch (std::exception& e)
-	{
-		std::cerr << e.what() << std::endl;
-		free(bitmap);
-		return;
-	}
-	free(bitmap);
-}
-#endif
+// 			if (y < YRES-1)
+// 				for (x=x1; x<=x2; x++)
+// 					if (!bitmap[x+(y+1)*XRES] && ColorCompare(ren, x, y+1, replaceR, replaceG, replaceB))
+// 						cs.push(x, y+1);
+// 		} while (cs.getSize() > 0);
+// 	}
+// 	catch (std::exception& e)
+// 	{
+// 		std::cerr << e.what() << std::endl;
+// 		free(bitmap);
+// 		return;
+// 	}
+// 	free(bitmap);
+// }
+// #endif
 
-int Simulation::Tool(int x, int y, int tool, int brushX, int brushY, float strength)
-{
-	Particle * cpart = NULL;
-	int r;
-	if ((r = pmap[y][x]))
-		cpart = &(parts[ID(r)]);
-	else if ((r = photons[y][x]))
-		cpart = &(parts[ID(r)]);
-	return tools[tool].Perform(this, cpart, x, y, brushX, brushY, strength);
-}
-
-#ifndef RENDERER
-int Simulation::ToolBrush(int positionX, int positionY, int tool, Brush * cBrush, float strength)
-{
-	if(cBrush)
-	{
-		int radiusX = cBrush->GetRadius().X, radiusY = cBrush->GetRadius().Y, sizeX = cBrush->GetSize().X, sizeY = cBrush->GetSize().Y;
-		unsigned char *bitmap = cBrush->GetBitmap();
-		for(int y = 0; y < sizeY; y++)
-			for(int x = 0; x < sizeX; x++)
-				if(bitmap[(y*sizeX)+x] && (positionX+(x-radiusX) >= 0 && positionY+(y-radiusY) >= 0 && positionX+(x-radiusX) < XRES && positionY+(y-radiusY) < YRES))
-					Tool(positionX + (x - radiusX), positionY + (y - radiusY), tool, positionX, positionY, strength);
-	}
-	return 0;
-}
-
-void Simulation::ToolLine(int x1, int y1, int x2, int y2, int tool, Brush * cBrush, float strength)
-{
-	bool reverseXY = abs(y2-y1) > abs(x2-x1);
-	int x, y, dx, dy, sy, rx = cBrush->GetRadius().X, ry = cBrush->GetRadius().Y;
-	float e = 0.0f, de;
-	if (reverseXY)
-	{
-		y = x1;
-		x1 = y1;
-		y1 = y;
-		y = x2;
-		x2 = y2;
-		y2 = y;
-	}
-	if (x1 > x2)
-	{
-		y = x1;
-		x1 = x2;
-		x2 = y;
-		y = y1;
-		y1 = y2;
-		y2 = y;
-	}
-	dx = x2 - x1;
-	dy = abs(y2 - y1);
-	if (dx)
-		de = dy/(float)dx;
-	else
-		de = 0.0f;
-	y = y1;
-	sy = (y1<y2) ? 1 : -1;
-	for (x=x1; x<=x2; x++)
-	{
-		if (reverseXY)
-			ToolBrush(y, x, tool, cBrush, strength);
-		else
-			ToolBrush(x, y, tool, cBrush, strength);
-		e += de;
-		if (e >= 0.5f)
-		{
-			y += sy;
-			if (!(rx+ry) && ((y1<y2) ? (y<=y2) : (y>=y2)))
-			{
-				if (reverseXY)
-					ToolBrush(y, x, tool, cBrush, strength);
-				else
-					ToolBrush(x, y, tool, cBrush, strength);
-			}
-			e -= 1.0f;
-		}
-	}
-}
-void Simulation::ToolBox(int x1, int y1, int x2, int y2, int tool, float strength)
-{
-	int brushX, brushY;
-	brushX = ((x1 + x2) / 2);
-	brushY = ((y1 + y2) / 2);
-	int i, j;
-	if (x1>x2)
-	{
-		i = x2;
-		x2 = x1;
-		x1 = i;
-	}
-	if (y1>y2)
-	{
-		j = y2;
-		y2 = y1;
-		y1 = j;
-	}
-	for (j=y1; j<=y2; j++)
-		for (i=x1; i<=x2; i++)
-			Tool(i, j, tool, brushX, brushY, strength);
-}
-#endif
-
+// * TODO-REDO_UI: get rid of this
 int Simulation::CreateWalls(int x, int y, int rx, int ry, int wall, Brush * cBrush)
 {
-	if(cBrush)
-	{
-		rx = cBrush->GetRadius().X;
-		ry = cBrush->GetRadius().Y;
-	}
+	// if(cBrush)
+	// {
+	// 	rx = cBrush->GetRadius().X;
+	// 	ry = cBrush->GetRadius().Y;
+	// }
 
 	ry = ry/CELL;
 	rx = rx/CELL;
@@ -1540,6 +1332,7 @@ int Simulation::CreateWalls(int x, int y, int rx, int ry, int wall, Brush * cBru
 	return 1;
 }
 
+// * TODO-REDO_UI: get rid of this
 void Simulation::CreateWallLine(int x1, int y1, int x2, int y2, int rx, int ry, int wall, Brush * cBrush)
 {
 	int x, y, dx, dy, sy;
@@ -1593,6 +1386,7 @@ void Simulation::CreateWallLine(int x1, int y1, int x2, int y2, int rx, int ry, 
 	}
 }
 
+// * TODO-REDO_UI: get rid of this
 void Simulation::CreateWallBox(int x1, int y1, int x2, int y2, int wall)
 {
 	int i, j;
@@ -1613,6 +1407,7 @@ void Simulation::CreateWallBox(int x1, int y1, int x2, int y2, int wall)
 			CreateWalls(i, j, 0, 0, wall, NULL);
 }
 
+// * TODO-REDO_UI: get rid of this
 int Simulation::FloodWalls(int x, int y, int wall, int bm)
 {
 	int x1, x2, dy = CELL;
@@ -1671,49 +1466,51 @@ int Simulation::FloodWalls(int x, int y, int wall, int bm)
 }
 
 #ifndef RENDERER
-int Simulation::CreateParts(int positionX, int positionY, int c, Brush * cBrush, int flags)
-{
-	if (flags == -1)
-		flags = replaceModeFlags;
-	if (cBrush)
-	{
-		int radiusX = cBrush->GetRadius().X, radiusY = cBrush->GetRadius().Y, sizeX = cBrush->GetSize().X, sizeY = cBrush->GetSize().Y;
-		unsigned char *bitmap = cBrush->GetBitmap();
+// * TODO-REDO_UI: get rid of this
+// int Simulation::CreateParts(int positionX, int positionY, int c, Brush * cBrush, int flags)
+// {
+// 	if (flags == -1)
+// 		flags = replaceModeFlags;
+// 	if (cBrush)
+// 	{
+// 		int radiusX = cBrush->GetRadius().X, radiusY = cBrush->GetRadius().Y, sizeX = cBrush->GetSize().X, sizeY = cBrush->GetSize().Y;
+// 		unsigned char *bitmap = cBrush->GetBitmap();
 
-		// special case for LIGH
-		if (c == PT_LIGH)
-		{
-			if (currentTick < lightningRecreate)
-				return 1;
-			int newlife = radiusX + radiusY;
-			if (newlife > 55)
-				newlife = 55;
-			c = PMAP(newlife, c);
-			lightningRecreate = currentTick + std::max(newlife / 4, 1);
-			return CreatePartFlags(positionX, positionY, c, flags);
-		}
-		else if (c == PT_TESC)
-		{
-			int newtmp = (radiusX*4+radiusY*4+7);
-			if (newtmp > 300)
-				newtmp = 300;
-			c = PMAP(newtmp, c);
-		}
+// 		// special case for LIGH
+// 		if (c == PT_LIGH)
+// 		{
+// 			if (currentTick < lightningRecreate)
+// 				return 1;
+// 			int newlife = radiusX + radiusY;
+// 			if (newlife > 55)
+// 				newlife = 55;
+// 			c = PMAP(newlife, c);
+// 			lightningRecreate = currentTick + std::max(newlife / 4, 1);
+// 			return CreatePartFlags(positionX, positionY, c, flags);
+// 		}
+// 		else if (c == PT_TESC)
+// 		{
+// 			int newtmp = (radiusX*4+radiusY*4+7);
+// 			if (newtmp > 300)
+// 				newtmp = 300;
+// 			c = PMAP(newtmp, c);
+// 		}
 
-		for (int y = sizeY-1; y >=0; y--)
-		{
-			for (int x = 0; x < sizeX; x++)
-			{
-				if (bitmap[(y*sizeX)+x] && (positionX+(x-radiusX) >= 0 && positionY+(y-radiusY) >= 0 && positionX+(x-radiusX) < XRES && positionY+(y-radiusY) < YRES))
-				{
-					CreatePartFlags(positionX+(x-radiusX), positionY+(y-radiusY), c, flags);
-				}
-			}
-		}
-	}
-	return 0;
-}
+// 		for (int y = sizeY-1; y >=0; y--)
+// 		{
+// 			for (int x = 0; x < sizeX; x++)
+// 			{
+// 				if (bitmap[(y*sizeX)+x] && (positionX+(x-radiusX) >= 0 && positionY+(y-radiusY) >= 0 && positionX+(x-radiusX) < XRES && positionY+(y-radiusY) < YRES))
+// 				{
+// 					CreatePartFlags(positionX+(x-radiusX), positionY+(y-radiusY), c, flags);
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return 0;
+// }
 
+// * TODO-REDO_UI: get rid of this
 int Simulation::CreateParts(int x, int y, int rx, int ry, int c, int flags)
 {
 	bool created = false;
@@ -1748,60 +1545,62 @@ int Simulation::CreateParts(int x, int y, int rx, int ry, int c, int flags)
 	return !created;
 }
 
-void Simulation::CreateLine(int x1, int y1, int x2, int y2, int c, Brush * cBrush, int flags)
-{
-	int x, y, dx, dy, sy, rx = cBrush->GetRadius().X, ry = cBrush->GetRadius().Y;
-	bool reverseXY = abs(y2-y1) > abs(x2-x1);
-	float e = 0.0f, de;
-	if (reverseXY)
-	{
-		y = x1;
-		x1 = y1;
-		y1 = y;
-		y = x2;
-		x2 = y2;
-		y2 = y;
-	}
-	if (x1 > x2)
-	{
-		y = x1;
-		x1 = x2;
-		x2 = y;
-		y = y1;
-		y1 = y2;
-		y2 = y;
-	}
-	dx = x2 - x1;
-	dy = abs(y2 - y1);
-	if (dx)
-		de = dy/(float)dx;
-	else
-		de = 0.0f;
-	y = y1;
-	sy = (y1<y2) ? 1 : -1;
-	for (x=x1; x<=x2; x++)
-	{
-		if (reverseXY)
-			CreateParts(y, x, c, cBrush, flags);
-		else
-			CreateParts(x, y, c, cBrush, flags);
-		e += de;
-		if (e >= 0.5f)
-		{
-			y += sy;
-			if (!(rx+ry) && ((y1<y2) ? (y<=y2) : (y>=y2)))
-			{
-				if (reverseXY)
-					CreateParts(y, x, c, cBrush, flags);
-				else
-					CreateParts(x, y, c, cBrush, flags);
-			}
-			e -= 1.0f;
-		}
-	}
-}
+// * TODO-REDO_UI: get rid of this
+// void Simulation::CreateLine(int x1, int y1, int x2, int y2, int c, Brush * cBrush, int flags)
+// {
+// 	int x, y, dx, dy, sy, rx = cBrush->GetRadius().X, ry = cBrush->GetRadius().Y;
+// 	bool reverseXY = abs(y2-y1) > abs(x2-x1);
+// 	float e = 0.0f, de;
+// 	if (reverseXY)
+// 	{
+// 		y = x1;
+// 		x1 = y1;
+// 		y1 = y;
+// 		y = x2;
+// 		x2 = y2;
+// 		y2 = y;
+// 	}
+// 	if (x1 > x2)
+// 	{
+// 		y = x1;
+// 		x1 = x2;
+// 		x2 = y;
+// 		y = y1;
+// 		y1 = y2;
+// 		y2 = y;
+// 	}
+// 	dx = x2 - x1;
+// 	dy = abs(y2 - y1);
+// 	if (dx)
+// 		de = dy/(float)dx;
+// 	else
+// 		de = 0.0f;
+// 	y = y1;
+// 	sy = (y1<y2) ? 1 : -1;
+// 	for (x=x1; x<=x2; x++)
+// 	{
+// 		if (reverseXY)
+// 			CreateParts(y, x, c, cBrush, flags);
+// 		else
+// 			CreateParts(x, y, c, cBrush, flags);
+// 		e += de;
+// 		if (e >= 0.5f)
+// 		{
+// 			y += sy;
+// 			if (!(rx+ry) && ((y1<y2) ? (y<=y2) : (y>=y2)))
+// 			{
+// 				if (reverseXY)
+// 					CreateParts(y, x, c, cBrush, flags);
+// 				else
+// 					CreateParts(x, y, c, cBrush, flags);
+// 			}
+// 			e -= 1.0f;
+// 		}
+// 	}
+// }
 #endif
 
+// * TODO-REDO_UI: get rid of this
 int Simulation::CreatePartFlags(int x, int y, int c, int flags)
 {
 	if (x < 0 || y < 0 || x >= XRES || y >= YRES)
@@ -1857,6 +1656,7 @@ int Simulation::CreatePartFlags(int x, int y, int c, int flags)
 }
 
 //Now simply creates a 0 pixel radius line without all the complicated flags / other checks
+// * TODO-REDO_UI: get rid of this
 void Simulation::CreateLine(int x1, int y1, int x2, int y2, int c)
 {
 	bool reverseXY = abs(y2-y1) > abs(x2-x1);
@@ -1914,6 +1714,7 @@ void Simulation::CreateLine(int x1, int y1, int x2, int y2, int c)
 }
 
 #ifndef RENDERER
+// * TODO-REDO_UI: get rid of this
 void Simulation::CreateBox(int x1, int y1, int x2, int y2, int c, int flags)
 {
 	int i, j;
@@ -1934,6 +1735,7 @@ void Simulation::CreateBox(int x1, int y1, int x2, int y2, int c, int flags)
 			CreateParts(i, j, 0, 0, c, flags);
 }
 
+// * TODO-REDO_UI: get rid of this
 int Simulation::FloodParts(int x, int y, int fullc, int cm, int flags)
 {
 	int c = TYP(fullc);
@@ -2642,7 +2444,7 @@ int Simulation::try_move(int i, int x, int y, int nx, int ny)
 		return 0;
 	}
 
-	int Element_FILT_interactWavelengths(Particle* cpart, int origWl);
+	int Element_FILT_interactWavelengths(const Particle *cpart, int origWl);
 	if (e == 2) //if occupy same space
 	{
 		switch (parts[i].type)
@@ -3300,9 +3102,9 @@ int Simulation::create_part(int p, int x, int y, int t, int v)
 	if((elements[t].Properties & TYPE_PART) && pretty_powder)
 	{
 		int colr, colg, colb;
-		colr = PIXR(elements[t].Colour) + int(sandcolour * 1.3) + RNG::Ref().between(-20, 20) + RNG::Ref().between(-15, 15);
-		colg = PIXG(elements[t].Colour) + int(sandcolour * 1.3) + RNG::Ref().between(-20, 20) + RNG::Ref().between(-15, 15);
-		colb = PIXB(elements[t].Colour) + int(sandcolour * 1.3) + RNG::Ref().between(-20, 20) + RNG::Ref().between(-15, 15);
+		colr = PixR(elements[t].Colour) + int(sandcolour * 1.3) + RNG::Ref().between(-20, 20) + RNG::Ref().between(-15, 15);
+		colg = PixG(elements[t].Colour) + int(sandcolour * 1.3) + RNG::Ref().between(-20, 20) + RNG::Ref().between(-15, 15);
+		colb = PixB(elements[t].Colour) + int(sandcolour * 1.3) + RNG::Ref().between(-20, 20) + RNG::Ref().between(-15, 15);
 		colr = colr>255 ? 255 : (colr<0 ? 0 : colr);
 		colg = colg>255 ? 255 : (colg<0 ? 0 : colg);
 		colb = colb>255 ? 255 : (colb<0 ? 0 : colb);
@@ -5308,7 +5110,6 @@ Simulation::Simulation():
 	wtypes = LoadWalls();
 	platent = LoadLatent();
 	std::copy(GetElements().begin(), GetElements().end(), elements.begin());
-	tools = GetTools();
 
 	player.comm = 0;
 	player2.comm = 0;

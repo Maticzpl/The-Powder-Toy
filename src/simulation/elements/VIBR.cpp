@@ -7,7 +7,7 @@ void Element::Element_VIBR()
 {
 	Identifier = "DEFAULT_PT_VIBR";
 	Name = "VIBR";
-	Colour = PIXPACK(0x005000);
+	Colour = 0x005000;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_VIBR()
 
 	DefaultProperties.temp = 273.15f;
 	HeatConduct = 251;
-	Description = "Vibranium. Stores energy and releases it in violent explosions.";
 
 	Properties = TYPE_SOLID|PROP_LIFE_DEC;
 

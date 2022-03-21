@@ -4,7 +4,7 @@ void Element::Element_MWAX()
 {
 	Identifier = "DEFAULT_PT_MWAX";
 	Name = "MWAX";
-	Colour = PIXPACK(0xE0E0AA);
+	Colour = 0xE0E0AA;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -28,7 +28,6 @@ void Element::Element_MWAX()
 
 	DefaultProperties.temp = R_TEMP + 28.0f + 273.15f;
 	HeatConduct = 44;
-	Description = "Liquid Wax. Hardens into WAX at 45 degrees.";
 
 	Properties = TYPE_LIQUID;
 

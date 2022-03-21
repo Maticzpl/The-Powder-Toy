@@ -7,7 +7,7 @@ void Element::Element_SPAWN()
 {
 	Identifier = "DEFAULT_PT_SPAWN";
 	Name = "SPWN";
-	Colour = PIXPACK(0xAAAAAA);
+	Colour = 0xAAAAAA;
 	MenuVisible = 0;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_SPAWN()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "STKM spawn point.";
 
 	Properties = TYPE_SOLID;
 

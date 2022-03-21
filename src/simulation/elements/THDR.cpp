@@ -7,7 +7,7 @@ void Element::Element_THDR()
 {
 	Identifier = "DEFAULT_PT_THDR";
 	Name = "THDR";
-	Colour = PIXPACK(0xFFFFA0);
+	Colour = 0xFFFFA0;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_THDR()
 
 	DefaultProperties.temp = 9000.0f + 273.15f;
 	HeatConduct = 1;
-	Description = "Lightning! Very hot, inflicts damage upon most materials, and transfers current to metals.";
 
 	Properties = TYPE_PART;
 

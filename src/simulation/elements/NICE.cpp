@@ -4,7 +4,7 @@ void Element::Element_NICE()
 {
 	Identifier = "DEFAULT_PT_NICE";
 	Name = "NICE";
-	Colour = PIXPACK(0xC0E0FF);
+	Colour = 0xC0E0FF;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -28,7 +28,6 @@ void Element::Element_NICE()
 
 	DefaultProperties.temp = 35.0f;
 	HeatConduct = 46;
-	Description = "Nitrogen Ice. Very cold, will melt into LN2 when heated only slightly.";
 
 	Properties = TYPE_SOLID;
 

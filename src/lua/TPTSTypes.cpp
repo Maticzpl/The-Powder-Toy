@@ -18,7 +18,7 @@ AnyType::AnyType(const AnyType & v):
 	if(type == TypeString)
 		value.str = new String(*(value.str));
 	else if(type == TypePoint)
-		value.pt = new ui::Point(*(value.pt));
+		value.pt = new gui::Point(*(value.pt));
 }
 
 AnyType::operator NumberType()
@@ -53,8 +53,8 @@ AnyType::operator StringType()
 	}
 	else if (type == TypePoint && value.pt)
 	{
-		ui::Point thisPoint = *(value.pt);
-		return StringType(String::Build(thisPoint.X, ",", thisPoint.Y));
+		gui::Point thisPoint = *(value.pt);
+		return StringType(String::Build(thisPoint.x, ",", thisPoint.y));
 	}
 	else
 		throw InvalidConversionException(type, TypeString);
@@ -127,17 +127,17 @@ String StringType::Value()
 
 //Point type
 
-PointType::PointType(ui::Point point): AnyType(TypePoint, ValueValue())
+PointType::PointType(gui::Point point): AnyType(TypePoint, ValueValue())
 {
-	value.pt = new ui::Point(point);
+	value.pt = new gui::Point(point);
 }
 
 PointType::PointType(int pointX, int pointY): AnyType(TypePoint, ValueValue())
 {
-	value.pt = new ui::Point(pointX, pointY);
+	value.pt = new gui::Point{ pointX, pointY };
 }
 
-ui::Point PointType::Value()
+gui::Point PointType::Value()
 {
 	return *value.pt;
 }

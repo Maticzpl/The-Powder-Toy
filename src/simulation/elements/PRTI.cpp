@@ -9,7 +9,7 @@ void Element::Element_PRTI()
 {
 	Identifier = "DEFAULT_PT_PRTI";
 	Name = "PRTI";
-	Colour = PIXPACK(0xEB5917);
+	Colour = 0xEB5917;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -32,7 +32,6 @@ void Element::Element_PRTI()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "Portal IN. Particles go in here. Also has temperature dependent channels. (same as WIFI)";
 
 	Properties = TYPE_SOLID;
 

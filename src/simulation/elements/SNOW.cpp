@@ -6,7 +6,7 @@ void Element::Element_SNOW()
 {
 	Identifier = "DEFAULT_PT_SNOW";
 	Name = "SNOW";
-	Colour = PIXPACK(0xC0E0FF);
+	Colour = 0xC0E0FF;
 	MenuVisible = 1;
 	MenuSection = SC_POWDERS;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_SNOW()
 
 	DefaultProperties.temp = R_TEMP - 30.0f + 273.15f;
 	HeatConduct = 46;
-	Description = "Light particles. Created when ICE breaks under pressure.";
 
 	Properties = TYPE_PART|PROP_NEUTPASS;
 

@@ -6,7 +6,7 @@ void Element::Element_FSEP()
 {
 	Identifier = "DEFAULT_PT_FSEP";
 	Name = "FSEP";
-	Colour = PIXPACK(0x63AD5F);
+	Colour = 0x63AD5F;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_FSEP()
 	Weight = 70;
 
 	HeatConduct = 70;
-	Description = "Fuse Powder. Burns slowly like FUSE.";
 
 	Properties = TYPE_PART;
 

@@ -1,16 +1,19 @@
-#include "common/tpt-minmax.h"
 #include "simulation/ElementCommon.h"
+#include "graphics/SimulationRenderer.h"
+#include "graphics/Pix.h"
 
 int Element_FIRE_update(UPDATE_FUNC_ARGS);
 static int updateLegacy(UPDATE_FUNC_ARGS);
 static int graphics(GRAPHICS_FUNC_ARGS);
 static void create(ELEMENT_CREATE_FUNC_ARGS);
 
+extern const char *flmData;
+
 void Element::Element_FIRE()
 {
 	Identifier = "DEFAULT_PT_FIRE";
 	Name = "FIRE";
-	Colour = PIXPACK(0xFF1000);
+	Colour = 0xFF1000;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -34,7 +37,6 @@ void Element::Element_FIRE()
 
 	DefaultProperties.temp = R_TEMP + 400.0f + 273.15f;
 	HeatConduct = 88;
-	Description = "Ignites flammable materials. Heats air.";
 
 	Properties = TYPE_GAS|PROP_LIFE_DEC|PROP_LIFE_KILL;
 
@@ -348,10 +350,15 @@ static int updateLegacy(UPDATE_FUNC_ARGS)
 
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
-	int caddress = int(restrict_flt(float(cpart->life), 0, 199)) * 3;
-	*colr = (unsigned char)ren->flm_data[caddress];
-	*colg = (unsigned char)ren->flm_data[caddress+1];
-	*colb = (unsigned char)ren->flm_data[caddress+2];
+	auto &ftbl = SimulationRenderer::FlameTable();
+	auto ftbls = int(ftbl.size());
+	auto caddress = cpart->life;
+	if (caddress <         0) caddress =         0;
+	if (caddress > ftbls - 1) caddress = ftbls - 1;
+	auto col = ftbl[caddress];
+	*colr = PixR(col);
+	*colg = PixG(col);
+	*colb = PixB(col);
 
 	*firea = 255;
 	*firer = *colr;

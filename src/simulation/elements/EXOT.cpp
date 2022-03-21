@@ -7,7 +7,7 @@ void Element::Element_EXOT()
 {
 	Identifier = "DEFAULT_PT_EXOT";
 	Name = "EXOT";
-	Colour = PIXPACK(0x247BFE);
+	Colour = 0x247BFE;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_EXOT()
 
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 250;
-	Description = "Exotic matter. Explodes with excess exposure to electrons. Has many other odd reactions.";
 
 	Properties = TYPE_LIQUID|PROP_NEUTPASS;
 

@@ -7,7 +7,7 @@ void Element::Element_HEAC()
 {
 	Identifier = "DEFAULT_PT_HEAC";
 	Name = "HEAC";
-	Colour = PIXPACK(0xCB6351);
+	Colour = 0xCB6351;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_HEAC()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Rapid heat conductor.";
 
 	Properties = TYPE_SOLID;
 

@@ -6,7 +6,7 @@ void Element::Element_ICEI()
 {
 	Identifier = "DEFAULT_PT_ICEI";
 	Name = "ICE";
-	Colour = PIXPACK(0xA0C0FF);
+	Colour = 0xA0C0FF;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_ICEI()
 
 	DefaultProperties.temp = R_TEMP - 50.0f + 273.15f;
 	HeatConduct = 46;
-	Description = "Crushes under pressure. Cools down air.";
 
 	Properties = TYPE_SOLID|PROP_LIFE_DEC|PROP_NEUTPASS;
 

@@ -1,18 +1,16 @@
 #include "simulation/ToolCommon.h"
 
-static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength);
+static void draw(DRAW_FUNC_ARGS);
 
 void SimTool::Tool_PGRV()
 {
 	Identifier = "DEFAULT_TOOL_PGRV";
 	Name = "PGRV";
-	Colour = PIXPACK(0xCCCCFF);
-	Description = "Creates a short-lasting gravity well.";
-	Perform = &perform;
+	Colour = 0xCCCCFF;
+	Draw = &draw;
 }
 
-static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength)
+static void draw(DRAW_FUNC_ARGS)
 {
-	sim->gravmap[((y/CELL)*(XRES/CELL))+(x/CELL)] = strength*5.0f;
-	return 1;
+	sim->gravmap[((pos.y/CELL)*(XRES/CELL))+(pos.x/CELL)] = strength*5.0f;
 }

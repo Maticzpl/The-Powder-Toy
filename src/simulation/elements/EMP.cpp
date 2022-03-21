@@ -7,7 +7,7 @@ void Element::Element_EMP()
 {
 	Identifier = "DEFAULT_PT_EMP";
 	Name = "EMP";
-	Colour = PIXPACK(0x66AAFF);
+	Colour = 0x66AAFF;
 	MenuVisible = 1;
 	MenuSection = SC_ELEC;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_EMP()
 	Weight = 100;
 
 	HeatConduct = 121;
-	Description = "Electromagnetic pulse. Breaks activated electronics.";
 
 	Properties = TYPE_SOLID|PROP_LIFE_DEC;
 

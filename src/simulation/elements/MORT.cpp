@@ -6,7 +6,7 @@ void Element::Element_MORT()
 {
 	Identifier = "DEFAULT_PT_MORT";
 	Name = "MORT";
-	Colour = PIXPACK(0xE0E0E0);
+	Colour = 0xE0E0E0;
 	MenuVisible = 1;
 	MenuSection = SC_CRACKER2;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_MORT()
 
 	DefaultProperties.temp = R_TEMP + 4.0f + 273.15f;
 	HeatConduct = 60;
-	Description = "Steam Train.";
 
 	Properties = TYPE_GAS;
 

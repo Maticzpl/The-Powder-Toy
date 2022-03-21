@@ -7,7 +7,7 @@ void Element::Element_BIZR()
 {
 	Identifier = "DEFAULT_PT_BIZR";
 	Name = "BIZR";
-	Colour = PIXPACK(0x00FF77);
+	Colour = 0x00FF77;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_BIZR()
 	Weight = 30;
 
 	HeatConduct = 29;
-	Description = "Bizarre... contradicts the normal state changes. Paints other elements with its deco color.";
 
 	Properties = TYPE_LIQUID;
 

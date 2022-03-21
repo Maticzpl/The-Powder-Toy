@@ -7,7 +7,7 @@ void Element::Element_FWRK()
 {
 	Identifier = "DEFAULT_PT_FWRK";
 	Name = "FWRK";
-	Colour = PIXPACK(0x666666);
+	Colour = 0x666666;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_FWRK()
 	Weight = 97;
 
 	HeatConduct = 100;
-	Description = "Original version of fireworks, activated by heat/neutrons.";
 
 	Properties = TYPE_PART|PROP_LIFE_DEC;
 

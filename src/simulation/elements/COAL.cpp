@@ -7,7 +7,7 @@ void Element::Element_COAL()
 {
 	Identifier = "DEFAULT_PT_COAL";
 	Name = "COAL";
-	Colour = PIXPACK(0x222222);
+	Colour = 0x222222;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_COAL()
 	Weight = 100;
 
 	HeatConduct = 200;
-	Description = "Coal, Burns very slowly. Gets red when hot.";
 
 	Properties = TYPE_SOLID;
 

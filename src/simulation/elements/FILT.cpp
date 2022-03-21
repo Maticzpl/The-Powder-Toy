@@ -2,14 +2,14 @@
 
 static int graphics(GRAPHICS_FUNC_ARGS);
 static void create(ELEMENT_CREATE_FUNC_ARGS);
-int Element_FILT_interactWavelengths(Particle* cpart, int origWl);
-int Element_FILT_getWavelengths(Particle* cpart);
+int Element_FILT_interactWavelengths(const Particle *cpart, int origWl);
+int Element_FILT_getWavelengths(const Particle *cpart);
 
 void Element::Element_FILT()
 {
 	Identifier = "DEFAULT_PT_FILT";
 	Name = "FILT";
-	Colour = PIXPACK(0x000056);
+	Colour = 0x000056;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -32,7 +32,6 @@ void Element::Element_FILT()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Filter for photons, changes the color.";
 
 	Properties = TYPE_SOLID | PROP_NOAMBHEAT | PROP_LIFE_DEC;
 
@@ -81,7 +80,7 @@ static void create(ELEMENT_CREATE_FUNC_ARGS)
 
 // Returns the wavelengths in a particle after FILT interacts with it (e.g. a photon)
 // cpart is the FILT particle, origWl the original wavelengths in the interacting particle
-int Element_FILT_interactWavelengths(Particle* cpart, int origWl)
+int Element_FILT_interactWavelengths(const Particle *cpart, int origWl)
 {
 	const int mask = 0x3FFFFFFF;
 	int filtWl = Element_FILT_getWavelengths(cpart);
@@ -135,7 +134,7 @@ int Element_FILT_interactWavelengths(Particle* cpart, int origWl)
 	}
 }
 
-int Element_FILT_getWavelengths(Particle* cpart)
+int Element_FILT_getWavelengths(const Particle *cpart)
 {
 	if (cpart->ctype&0x3FFFFFFF)
 	{

@@ -8,7 +8,7 @@ void Element::Element_CRAY()
 {
 	Identifier = "DEFAULT_PT_CRAY";
 	Name = "CRAY";
-	Colour = PIXPACK(0xBBFF00);
+	Colour = 0xBBFF00;
 	MenuVisible = 1;
 	MenuSection = SC_ELEC;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_CRAY()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "Particle Ray Emitter. Creates a beam of particles set by its ctype, with a range set by tmp.";
 
 	Properties = TYPE_SOLID;
 
@@ -110,7 +109,7 @@ static int update(UPDATE_FUNC_ARGS)
 									colored = 0xFF000000;
 								else if (parts[ID(r)].tmp==0)
 								{
-									int Element_FILT_getWavelengths(Particle* cpart);
+									int Element_FILT_getWavelengths(const Particle *cpart);
 									colored = wavelengthToDecoColour(Element_FILT_getWavelengths(&parts[ID(r)]));
 								}
 								else if (colored==0xFF000000)

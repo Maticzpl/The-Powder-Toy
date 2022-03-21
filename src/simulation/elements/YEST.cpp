@@ -6,7 +6,7 @@ void Element::Element_YEST()
 {
 	Identifier = "DEFAULT_PT_YEST";
 	Name = "YEST";
-	Colour = PIXPACK(0xEEE0C0);
+	Colour = 0xEEE0C0;
 	MenuVisible = 1;
 	MenuSection = SC_POWDERS;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_YEST()
 	Weight = 80;
 
 	HeatConduct = 70;
-	Description = "Yeast, grows when warm (~37C).";
 
 	Properties = TYPE_PART;
 

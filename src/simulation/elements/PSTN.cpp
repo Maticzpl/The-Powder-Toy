@@ -12,7 +12,7 @@ void Element::Element_PSTN()
 {
 	Identifier = "DEFAULT_PT_PSTN";
 	Name = "PSTN";
-	Colour = PIXPACK(0xAA9999);
+	Colour = 0xAA9999;
 	MenuVisible = 1;
 	MenuSection = SC_FORCE;
 	Enabled = 1;
@@ -36,7 +36,6 @@ void Element::Element_PSTN()
 
 	DefaultProperties.temp = 10.0f + 273.15f;
 	HeatConduct = 0;
-	Description = "Piston, extends and pushes particles.";
 
 	Properties = TYPE_SOLID;
 

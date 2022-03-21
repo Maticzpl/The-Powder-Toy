@@ -9,7 +9,7 @@ void Element::Element_STOR()
 {
 	Identifier = "DEFAULT_PT_STOR";
 	Name = "STOR";
-	Colour = PIXPACK(0x50DFDF);
+	Colour = 0x50DFDF;
 	MenuVisible = 1;
 	MenuSection = SC_POWERED;
 	Enabled = 1;
@@ -32,7 +32,6 @@ void Element::Element_STOR()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "Storage. Captures and stores a single particle. Releases when charged with PSCN, also passes to PIPE.";
 
 	Properties = TYPE_SOLID | PROP_NOCTYPEDRAW;
 

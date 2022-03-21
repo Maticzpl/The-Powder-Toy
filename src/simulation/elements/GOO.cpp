@@ -6,7 +6,7 @@ void Element::Element_GOO()
 {
 	Identifier = "DEFAULT_PT_GOO";
 	Name = "GOO";
-	Colour = PIXPACK(0x804000);
+	Colour = 0x804000;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_GOO()
 	Weight = 100;
 
 	HeatConduct = 75;
-	Description = "Deforms and disappears under pressure.";
 
 	Properties = TYPE_SOLID | PROP_NEUTPENETRATE|PROP_LIFE_DEC|PROP_LIFE_KILL_DEC;
 

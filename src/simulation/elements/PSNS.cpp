@@ -6,7 +6,7 @@ void Element::Element_PSNS()
 {
 	Identifier = "DEFAULT_PT_PSNS";
 	Name = "PSNS";
-	Colour = PIXPACK(0xDB2020);
+	Colour = 0xDB2020;
 	MenuVisible = 1;
 	MenuSection = SC_SENSOR;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_PSNS()
 
 	DefaultProperties.temp = 4.0f + 273.15f;
 	HeatConduct = 0;
-	Description = "Pressure sensor, creates a spark when the pressure is greater than its temperature.";
 
 	Properties = TYPE_SOLID;
 

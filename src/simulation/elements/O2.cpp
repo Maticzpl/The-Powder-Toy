@@ -6,7 +6,7 @@ void Element::Element_O2()
 {
 	Identifier = "DEFAULT_PT_O2";
 	Name = "OXYG";
-	Colour = PIXPACK(0x80A0FF);
+	Colour = 0x80A0FF;
 	MenuVisible = 1;
 	MenuSection = SC_GAS;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_O2()
 	Weight = 1;
 
 	HeatConduct = 70;
-	Description = "Oxygen gas. Ignites easily.";
 
 	Properties = TYPE_GAS;
 

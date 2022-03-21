@@ -8,7 +8,7 @@ void Element::Element_ELEC()
 {
 	Identifier = "DEFAULT_PT_ELEC";
 	Name = "ELEC";
-	Colour = PIXPACK(0xDFEFFF);
+	Colour = 0xDFEFFF;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -32,7 +32,6 @@ void Element::Element_ELEC()
 
 	DefaultProperties.temp = R_TEMP + 200.0f + 273.15f;
 	HeatConduct = 251;
-	Description = "Electrons. Sparks electronics, reacts with NEUT and WATR.";
 
 	Properties = TYPE_ENERGY|PROP_LIFE_DEC|PROP_LIFE_KILL_DEC;
 

@@ -6,7 +6,7 @@ void Element::Element_WTRV()
 {
 	Identifier = "DEFAULT_PT_WTRV";
 	Name = "WTRV";
-	Colour = PIXPACK(0xA0A0FF);
+	Colour = 0xA0A0FF;
 	MenuVisible = 1;
 	MenuSection = SC_GAS;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_WTRV()
 
 	DefaultProperties.temp = R_TEMP + 100.0f + 273.15f;
 	HeatConduct = 48;
-	Description = "Steam. Produced from hot water.";
 
 	Properties = TYPE_GAS;
 

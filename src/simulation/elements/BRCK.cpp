@@ -6,7 +6,7 @@ void Element::Element_BRCK()
 {
 	Identifier = "DEFAULT_PT_BRCK";
 	Name = "BRCK";
-	Colour = PIXPACK(0x808080);
+	Colour = 0x808080;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_BRCK()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Brick, breakable building material.";
 
 	Properties = TYPE_SOLID|PROP_HOT_GLOW;
 

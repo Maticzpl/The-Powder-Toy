@@ -8,7 +8,7 @@ void Element::Element_SOAP()
 {
 	Identifier = "DEFAULT_PT_SOAP";
 	Name = "SOAP";
-	Colour = PIXPACK(0xF5F5DC);
+	Colour = 0xF5F5DC;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -32,7 +32,6 @@ void Element::Element_SOAP()
 
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
-	Description = "Soap. Creates bubbles, washes off deco color, and cures virus.";
 
 	Properties = TYPE_LIQUID|PROP_NEUTPENETRATE|PROP_LIFE_DEC;
 

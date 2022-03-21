@@ -4,7 +4,7 @@ void Element::Element_BHOL()
 {
 	Identifier = "DEFAULT_PT_BHOL";
 	Name = "VACU";
-	Colour = PIXPACK(0x303030);
+	Colour = 0x303030;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -28,7 +28,6 @@ void Element::Element_BHOL()
 
 	DefaultProperties.temp = R_TEMP + 70.0f + 273.15f;
 	HeatConduct = 255;
-	Description = "Vacuum, sucks in other particles and heats up.";
 
 	Properties = TYPE_SOLID;
 

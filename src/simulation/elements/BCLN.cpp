@@ -6,7 +6,7 @@ void Element::Element_BCLN()
 {
 	Identifier = "DEFAULT_PT_BCLN";
 	Name = "BCLN";
-	Colour = PIXPACK(0xFFD040);
+	Colour = 0xFFD040;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_BCLN()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Breakable Clone.";
 
 	Properties = TYPE_SOLID | PROP_LIFE_DEC | PROP_LIFE_KILL_DEC | PROP_NOCTYPEDRAW;
 

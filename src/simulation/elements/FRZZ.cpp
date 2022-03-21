@@ -6,7 +6,7 @@ void Element::Element_FRZZ()
 {
 	Identifier = "DEFAULT_PT_FRZZ";
 	Name = "FRZZ";
-	Colour = PIXPACK(0xC0E0FF);
+	Colour = 0xC0E0FF;
 	MenuVisible = 1;
 	MenuSection = SC_POWDERS;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_FRZZ()
 
 	DefaultProperties.temp = 253.15f;
 	HeatConduct = 46;
-	Description = "Freeze powder. When melted, forms ice that always cools. Spreads with regular water.";
 
 	Properties = TYPE_PART;
 

@@ -4,7 +4,7 @@ void Element::Element_GUNP()
 {
 	Identifier = "DEFAULT_PT_GUNP";
 	Name = "GUN";
-	Colour = PIXPACK(0xC0C0D0);
+	Colour = 0xC0C0D0;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -27,7 +27,6 @@ void Element::Element_GUNP()
 	Weight = 85;
 
 	HeatConduct = 97;
-	Description = "Gunpowder. Light dust, explodes on contact with fire or spark.";
 
 	Properties = TYPE_PART;
 

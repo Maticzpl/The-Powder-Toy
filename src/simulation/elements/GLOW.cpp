@@ -7,7 +7,7 @@ void Element::Element_GLOW()
 {
 	Identifier = "DEFAULT_PT_GLOW";
 	Name = "GLOW";
-	Colour = PIXPACK(0x445464);
+	Colour = 0x445464;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_GLOW()
 
 	DefaultProperties.temp = R_TEMP + 20.0f + 273.15f;
 	HeatConduct = 44;
-	Description = "Glow, Glows under pressure.";
 
 	Properties = TYPE_LIQUID | PROP_LIFE_DEC;
 

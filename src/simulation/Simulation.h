@@ -44,7 +44,6 @@ public:
 	std::vector<sign> signs;
 	std::array<Element, PT_NUM> elements;
 	//Element * elements;
-	std::vector<SimTool> tools;
 	std::vector<unsigned int> platent;
 	std::vector<wall_type> wtypes;
 	std::vector<menu_section> msections;
@@ -117,8 +116,8 @@ public:
 
 	int Load(const GameSave * save, bool includePressure);
 	int Load(const GameSave * save, bool includePressure, int x, int y);
-	GameSave * Save(bool includePressure);
-	GameSave * Save(bool includePressure, int x1, int y1, int x2, int y2);
+	std::unique_ptr<GameSave> Save(bool includePressure);
+	std::unique_ptr<GameSave> Save(bool includePressure, int x1, int y1, int x2, int y2);
 	void SaveSimOptions(GameSave * gameSave);
 	SimulationSample GetSample(int x, int y);
 
@@ -171,20 +170,6 @@ public:
 
 	void SetEdgeMode(int newEdgeMode);
 	void SetDecoSpace(int newDecoSpace);
-
-	//Drawing Deco
-	void ApplyDecoration(int x, int y, int colR, int colG, int colB, int colA, int mode);
-	void ApplyDecorationPoint(int x, int y, int colR, int colG, int colB, int colA, int mode, Brush * cBrush = NULL);
-	void ApplyDecorationLine(int x1, int y1, int x2, int y2, int colR, int colG, int colB, int colA, int mode, Brush * cBrush = NULL);
-	void ApplyDecorationBox(int x1, int y1, int x2, int y2, int colR, int colG, int colB, int colA, int mode);
-	bool ColorCompare(Renderer *ren, int x, int y, int replaceR, int replaceG, int replaceB);
-	void ApplyDecorationFill(Renderer *ren, int x, int y, int colR, int colG, int colB, int colA, int replaceR, int replaceG, int replaceB);
-
-	//Drawing Tools like HEAT, AIR, and GRAV
-	int Tool(int x, int y, int tool, int brushX, int brushY, float strength = 1.0f);
-	int ToolBrush(int x, int y, int tool, Brush * cBrush, float strength = 1.0f);
-	void ToolLine(int x1, int y1, int x2, int y2, int tool, Brush * cBrush, float strength = 1.0f);
-	void ToolBox(int x1, int y1, int x2, int y2, int tool, float strength = 1.0f);
 
 	//Drawing Walls
 	int CreateWalls(int x, int y, int rx, int ry, int wall, Brush * cBrush = NULL);

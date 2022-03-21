@@ -1,12 +1,14 @@
 #ifndef ELEMENTCLASS_H
 #define ELEMENTCLASS_H
 
-#include "graphics/Pixel.h"
 #include "ElementDefs.h"
 #include "Particle.h"
 #include "StructProperty.h"
 
+#include <cstdint>
+
 class Simulation;
+class SimulationRenderer;
 class Renderer;
 class VideoBuffer;
 struct Particle;
@@ -15,7 +17,7 @@ class Element
 public:
 	ByteString Identifier;
 	String Name;
-	pixel Colour;
+	uint32_t Colour;
 	int MenuVisible;
 	int MenuSection;
 	int Enabled;
@@ -38,7 +40,6 @@ public:
 	unsigned int PhotonReflectWavelengths;
 	int Weight;
 	unsigned char HeatConduct;
-	String Description;
 	unsigned int Properties;
 
 	float LowPressure;

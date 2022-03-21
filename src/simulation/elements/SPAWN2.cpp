@@ -7,7 +7,7 @@ void Element::Element_SPAWN2()
 {
 	Identifier = "DEFAULT_PT_SPAWN2";
 	Name = "SPWN2";
-	Colour = PIXPACK(0xAAAAAA);
+	Colour = 0xAAAAAA;
 	MenuVisible = 0;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_SPAWN2()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "STK2 spawn point.";
 
 	Properties = TYPE_SOLID;
 

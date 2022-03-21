@@ -6,7 +6,7 @@ void Element::Element_SHLD4()
 {
 	Identifier = "DEFAULT_PT_SHLD4";
 	Name = "SHD4";
-	Colour = PIXPACK(0x212121);
+	Colour = 0x212121;
 	MenuVisible = 0;
 	MenuSection = SC_CRACKER2;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_SHLD4()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "Shield lvl 4.";
 
 	Properties = TYPE_SOLID|PROP_LIFE_DEC;
 

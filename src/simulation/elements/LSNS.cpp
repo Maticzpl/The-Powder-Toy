@@ -6,7 +6,7 @@ void Element::Element_LSNS()
 {
 	Identifier = "DEFAULT_PT_LSNS";
 	Name = "LSNS";
-	Colour = PIXPACK(0x336699);
+	Colour = 0x336699;
 	MenuVisible = 1;
 	MenuSection = SC_SENSOR;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_LSNS()
 
 	DefaultProperties.temp = 4.0f + 273.15f;
 	HeatConduct = 0;
-	Description = "Life sensor, creates a spark when there's a nearby particle with a life higher than its temperature.";
 
 	Properties = TYPE_SOLID;
 

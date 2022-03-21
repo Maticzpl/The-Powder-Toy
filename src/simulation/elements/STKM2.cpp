@@ -12,7 +12,7 @@ void Element::Element_STKM2()
 {
 	Identifier = "DEFAULT_PT_STKM2";
 	Name = "STK2";
-	Colour = PIXPACK(0x6464FF);
+	Colour = 0x6464FF;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -37,7 +37,6 @@ void Element::Element_STKM2()
 
 	DefaultProperties.temp = R_TEMP + 14.6f + 273.15f;
 	HeatConduct = 0;
-	Description = "Second stickman. Don't kill him! Control with wasd.";
 
 	Properties = PROP_NOCTYPEDRAW;
 

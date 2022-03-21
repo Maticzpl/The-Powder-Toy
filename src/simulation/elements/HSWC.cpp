@@ -7,7 +7,7 @@ void Element::Element_HSWC()
 {
 	Identifier = "DEFAULT_PT_HSWC";
 	Name = "HSWC";
-	Colour = PIXPACK(0x3B0A0A);
+	Colour = 0x3B0A0A;
 	MenuVisible = 1;
 	MenuSection = SC_POWERED;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_HSWC()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Heat switch. Conducts heat only when activated.";
 
 	Properties = TYPE_SOLID;
 

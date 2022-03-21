@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 		outputCpp << (unsigned int)(unsigned char)(ch) << ", ";
 		dataLen += 1;
 	}
-	outputCpp << " }; const unsigned int " << symbolName << "_size = " << dataLen << ";\n";
+	outputCpp << " }; const unsigned int " << symbolName << "Size = " << dataLen << ";\n";
 	if (!outputCpp)
 	{
 		return 4;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	{
 		return 5;
 	}
-	outputH << "#pragma once\nextern const unsigned char " << symbolName << "[]; extern const unsigned int " << symbolName << "_size;\n";
+	outputH << "#pragma once\nextern const unsigned char " << symbolName << "[]; extern const unsigned int " << symbolName << "Size;\n";
 	if (!outputH)
 	{
 		return 6;

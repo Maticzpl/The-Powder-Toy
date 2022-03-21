@@ -6,7 +6,7 @@ void Element::Element_RIME()
 {
 	Identifier = "DEFAULT_PT_RIME";
 	Name = "RIME";
-	Colour = PIXPACK(0xCCCCCC);
+	Colour = 0xCCCCCC;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_RIME()
 
 	DefaultProperties.temp = -30.0f + 273.15f;
 	HeatConduct = 100;
-	Description = "Solid, created when steam cools rapidly and goes through sublimation.";
 
 	Properties = TYPE_SOLID;
 

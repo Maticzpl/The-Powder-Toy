@@ -6,7 +6,7 @@ void Element::Element_NBHL()
 {
 	Identifier = "DEFAULT_PT_NBHL";
 	Name = "BHOL";
-	Colour = PIXPACK(0x202020);
+	Colour = 0x202020;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_NBHL()
 	Weight = 100;
 
 	HeatConduct = 186;
-	Description = "Black hole, sucks in particles using gravity. (Requires Newtonian gravity)";
 
 	Properties = TYPE_SOLID;
 

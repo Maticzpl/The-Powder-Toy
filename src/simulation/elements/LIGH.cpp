@@ -9,7 +9,7 @@ void Element::Element_LIGH()
 {
 	Identifier = "DEFAULT_PT_LIGH";
 	Name = "LIGH";
-	Colour = PIXPACK(0xFFFFC0);
+	Colour = 0xFFFFC0;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -32,7 +32,6 @@ void Element::Element_LIGH()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "Lightning. Change the brush size to set the size of the lightning.";
 
 	Properties = TYPE_SOLID;
 

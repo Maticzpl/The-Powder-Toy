@@ -7,7 +7,7 @@ void Element::Element_BCOL()
 {
 	Identifier = "DEFAULT_PT_BCOL";
 	Name = "BCOL";
-	Colour = PIXPACK(0x333333);
+	Colour = 0x333333;
 	MenuVisible = 1;
 	MenuSection = SC_POWDERS;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_BCOL()
 	Weight = 90;
 
 	HeatConduct = 150;
-	Description = "Broken Coal. Heavy particles, burns slowly.";
 
 	Properties = TYPE_PART;
 

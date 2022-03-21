@@ -7,7 +7,7 @@ void Element::Element_LDTC()
 {
 	Identifier = "DEFAULT_PT_LDTC";
 	Name = "LDTC";
-	Colour = PIXPACK(0x66ff66);
+	Colour = 0x66ff66;
 	MenuVisible = 1;
 	MenuSection = SC_SENSOR;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_LDTC()
 	Weight = 100;
 
 	HeatConduct = 0;
-	Description = "Linear detector. Scans in 8 directions for particles with its ctype and creates a spark on the opposite side.";
 
 	Properties = TYPE_SOLID | PROP_NOCTYPEDRAW;
 
@@ -148,7 +147,7 @@ static int update(UPDATE_FUNC_ARGS)
 							continue;
 
 						int nx = x + rx, ny = y + ry;
-						int Element_FILT_getWavelengths(Particle* cpart);
+						int Element_FILT_getWavelengths(const Particle *cpart);
 						int photonWl = TYP(rr) == PT_FILT ?
 							Element_FILT_getWavelengths(&parts[ID(rr)]) :
 							parts[ID(rr)].ctype;

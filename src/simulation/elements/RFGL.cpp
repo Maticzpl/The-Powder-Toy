@@ -6,7 +6,7 @@ void Element::Element_RFGL()
 {
 	Identifier = "DEFAULT_PT_RFGL";
 	Name = "RFGL";
-	Colour = PIXPACK(0x84C2CF);
+	Colour = 0x84C2CF;
 	MenuVisible = 0;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -29,7 +29,6 @@ void Element::Element_RFGL()
 	Weight = 10;
 
 	HeatConduct = 3;
-	Description = "Liquid refrigerant.";
 
 	Properties = TYPE_LIQUID|PROP_DEADLY;
 

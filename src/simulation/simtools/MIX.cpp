@@ -3,51 +3,48 @@
 #include "common/tpt-rand.h"
 #include <cmath>
 
-static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength);
+static void draw(DRAW_FUNC_ARGS);
 
 void SimTool::Tool_MIX()
 {
 	Identifier = "DEFAULT_TOOL_MIX";
 	Name = "MIX";
-	Colour = PIXPACK(0xFFD090);
-	Description = "Mixes particles.";
-	Perform = &perform;
+	Colour = 0xFFD090;
+	Draw = &draw;
 }
 
-static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength)
+static void draw(DRAW_FUNC_ARGS)
 {
-	int thisPart = sim->pmap[y][x];
+	int thisPart = sim->pmap[pos.y][pos.x];
 	if(!thisPart)
-		return 0;
+		return;
 
 	if(random_gen() % 100 != 0)
-		return 0;
+		return;
 
 	int distance = (int)(std::pow(strength, .5f) * 10);
 
 	if(!(sim->elements[TYP(thisPart)].Properties & (TYPE_PART | TYPE_LIQUID | TYPE_GAS)))
-		return 0;
+		return;
 
-	int newX = x + (random_gen() % distance) - (distance/2);
-	int newY = y + (random_gen() % distance) - (distance/2);
+	int newX = pos.x + (random_gen() % distance) - (distance/2);
+	int newY = pos.y + (random_gen() % distance) - (distance/2);
 
 	if(newX < 0 || newY < 0 || newX >= XRES || newY >= YRES)
-		return 0;
+		return;
 
 	int thatPart = sim->pmap[newY][newX];
 	if(!thatPart)
-		return 0;
+		return;
 
 	if ((sim->elements[TYP(thisPart)].Properties&STATE_FLAGS) != (sim->elements[TYP(thatPart)].Properties&STATE_FLAGS))
-		return 0;
+		return;
 
-	sim->pmap[y][x] = thatPart;
-	sim->parts[ID(thatPart)].x = float(x);
-	sim->parts[ID(thatPart)].y = float(y);
+	sim->pmap[pos.y][pos.x] = thatPart;
+	sim->parts[ID(thatPart)].x = float(pos.x);
+	sim->parts[ID(thatPart)].y = float(pos.y);
 
 	sim->pmap[newY][newX] = thisPart;
 	sim->parts[ID(thisPart)].x = float(newX);
 	sim->parts[ID(thisPart)].y = float(newY);
-
-	return 1;
 }

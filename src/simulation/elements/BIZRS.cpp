@@ -7,7 +7,7 @@ void Element::Element_BIZRS()
 {
 	Identifier = "DEFAULT_PT_BIZRS";
 	Name = "BIZS";
-	Colour = PIXPACK(0x00E455);
+	Colour = 0x00E455;
 	MenuVisible = 1;
 	MenuSection = SC_CRACKER2;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_BIZRS()
 
 	DefaultProperties.temp = R_TEMP + 300.0f + 273.15f;
 	HeatConduct = 251;
-	Description = "Bizarre solid.";
 
 	Properties = TYPE_SOLID;
 

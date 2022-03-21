@@ -6,7 +6,7 @@ void Element::Element_PLUT()
 {
 	Identifier = "DEFAULT_PT_PLUT";
 	Name = "PLUT";
-	Colour = PIXPACK(0x407020);
+	Colour = 0x407020;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -31,7 +31,6 @@ void Element::Element_PLUT()
 
 	DefaultProperties.temp = R_TEMP + 4.0f + 273.15f;
 	HeatConduct = 251;
-	Description = "Plutonium. Heavy, fissile particles. Generates neutrons under pressure.";
 
 	Properties = TYPE_PART|PROP_NEUTPASS|PROP_RADIOACTIVE;
 

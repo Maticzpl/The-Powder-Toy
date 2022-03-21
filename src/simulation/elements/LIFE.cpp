@@ -1,4 +1,6 @@
 #include "simulation/ElementCommon.h"
+#include "graphics/SimulationRenderer.h"
+#include "graphics/Pix.h"
 
 static int graphics(GRAPHICS_FUNC_ARGS);
 static void create(ELEMENT_CREATE_FUNC_ARGS);
@@ -7,7 +9,7 @@ void Element::Element_LIFE()
 {
 	Identifier = "DEFAULT_PT_LIFE";
 	Name = "LIFE";
-	Colour = PIXPACK(0x0CAC00);
+	Colour = 0x0CAC00;
 	MenuVisible = 0;
 	MenuSection = SC_LIFE;
 	Enabled = 1;
@@ -31,7 +33,6 @@ void Element::Element_LIFE()
 
 	DefaultProperties.temp = 9000.0f;
 	HeatConduct = 40;
-	Description = "Game Of Life! B3/S23";
 
 	Properties = TYPE_SOLID|PROP_LIFE;
 
@@ -54,13 +55,13 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 	auto colour2 = cpart->tmp;
 	if (!colour1)
 	{
-		colour1 = PIXPACK(0xFFFFFF);
+		colour1 = 0xFFFFFF;
 	}
 	auto ruleset = cpart->ctype;
-	bool renderDeco = !ren->blackDecorations;
+	bool renderDeco = !ren->BlackDecorations();
 	if (ruleset >= 0 && ruleset < NGOL)
 	{
-		if (!renderDeco || !ren->decorations_enable)
+		if (!renderDeco || !ren->DecorationsEnabled())
 		{
 			colour1 = builtinGol[ruleset].colour;
 			colour2 = builtinGol[ruleset].colour2;
@@ -73,16 +74,16 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 		auto states = ((ruleset >> 17) & 0xF) + 2;
 		if (states == 2)
 		{
-			*colr = PIXR(colour1);
-			*colg = PIXG(colour1);
-			*colb = PIXB(colour1);
+			*colr = PixR(colour1);
+			*colg = PixG(colour1);
+			*colb = PixB(colour1);
 		}
 		else
 		{
 			auto mul = (cpart->tmp2 - 1) / float(states - 2);
-			*colr = int(PIXR(colour1) * mul + PIXR(colour2) * (1.f - mul));
-			*colg = int(PIXG(colour1) * mul + PIXG(colour2) * (1.f - mul));
-			*colb = int(PIXB(colour1) * mul + PIXB(colour2) * (1.f - mul));
+			*colr = int(PixR(colour1) * mul + PixR(colour2) * (1.f - mul));
+			*colg = int(PixG(colour1) * mul + PixG(colour2) * (1.f - mul));
+			*colb = int(PixB(colour1) * mul + PixB(colour2) * (1.f - mul));
 		}
 	}
 	*pixel_mode |= NO_DECO;

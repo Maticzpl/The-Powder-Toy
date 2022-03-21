@@ -4,7 +4,7 @@ void Element::Element_PSTE()
 {
 	Identifier = "DEFAULT_PT_PSTE";
 	Name = "PSTE";
-	Colour = PIXPACK(0xAA99AA);
+	Colour = 0xAA99AA;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -28,7 +28,6 @@ void Element::Element_PSTE()
 
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
-	Description = "Colloid, Hardens under pressure.";
 
 	Properties = TYPE_LIQUID;
 

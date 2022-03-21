@@ -3,10 +3,10 @@
 #include "Config.h"
 
 #include "common/String.h"
-#include "gui/interface/Point.h"
+#include "gui/Point.h"
 
 enum ValueType { TypeNumber, TypeFloat, TypePoint, TypeString, TypeNull, TypeFunction };
-typedef union { int num; float numf; String* str; ui::Point* pt; } ValueValue;
+typedef union { int num; float numf; String* str; gui::Point* pt; } ValueValue;
 
 class GeneralException
 {
@@ -115,9 +115,9 @@ public:
 class PointType: public AnyType
 {
 public:
-	PointType(ui::Point point);
+	PointType(gui::Point point);
 	PointType(int pointX, int pointY);
-	ui::Point Value();
+	gui::Point Value();
 };
 
 #endif /* TPTSTYPES_H_ */

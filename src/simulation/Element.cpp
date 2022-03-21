@@ -2,9 +2,9 @@
 #include "StructProperty.h"
 
 Element::Element():
-	Identifier("DEFAULT_INVALID"),
+	Identifier("DEFAULT_PT_INVALID"),
 	Name(""),
-	Colour(PIXPACK(0xFF00FF)),
+	Colour(0xFF00FF),
 	MenuVisible(0),
 	MenuSection(0),
 	Enabled(0),
@@ -29,7 +29,6 @@ Element::Element():
 	Weight(50),
 
 	HeatConduct(128),
-	Description("No description"),
 
 	Properties(TYPE_SOLID),
 
@@ -78,7 +77,6 @@ std::vector<StructProperty> const &Element::GetProperties()
 		{ "Weight",                    StructProperty::Integer,  offsetof(Element, Weight                   ) },
 		{ "Temperature",               StructProperty::Float,    offsetof(Element, DefaultProperties.temp   ) },
 		{ "HeatConduct",               StructProperty::UChar,    offsetof(Element, HeatConduct              ) },
-		{ "Description",               StructProperty::String,   offsetof(Element, Description              ) },
 		{ "State",                     StructProperty::Removed,  0                                            },
 		{ "Properties",                StructProperty::Integer,  offsetof(Element, Properties               ) },
 		{ "LowPressure",               StructProperty::Float,    offsetof(Element, LowPressure              ) },
@@ -216,12 +214,12 @@ int Element::defaultGraphics(GRAPHICS_FUNC_ARGS)
 {
 	int t = cpart->type;
 	//Property based defaults
-	if(ren->sim->elements[t].Properties & PROP_RADIOACTIVE) *pixel_mode |= PMODE_GLOW;
-	if(ren->sim->elements[t].Properties & TYPE_LIQUID)
+	if(sim->elements[t].Properties & PROP_RADIOACTIVE) *pixel_mode |= PMODE_GLOW;
+	if(sim->elements[t].Properties & TYPE_LIQUID)
 	{
 		*pixel_mode |= PMODE_BLUR;
 	}
-	if(ren->sim->elements[t].Properties & TYPE_GAS)
+	if(sim->elements[t].Properties & TYPE_GAS)
 	{
 		*pixel_mode &= ~PMODE;
 		*pixel_mode |= FIRE_BLEND;

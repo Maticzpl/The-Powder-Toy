@@ -9,7 +9,7 @@ void Element::Element_TUNG()
 {
 	Identifier = "DEFAULT_PT_TUNG";
 	Name = "TUNG";
-	Colour = PIXPACK(0x505050);
+	Colour = 0x505050;
 	MenuVisible = 1;
 	MenuSection = SC_ELEC;
 	Enabled = 1;
@@ -32,7 +32,6 @@ void Element::Element_TUNG()
 	Weight = 100;
 
 	HeatConduct = 251;
-	Description = "Tungsten. Brittle metal with a very high melting point.";
 
 	Properties = TYPE_SOLID|PROP_CONDUCTS|PROP_LIFE_DEC;
 
@@ -109,7 +108,7 @@ static int update(UPDATE_FUNC_ARGS)
 
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
-	const float MELTING_POINT = ren->sim->elements[PT_TUNG].HighTemperature;
+	const float MELTING_POINT = sim->elements[PT_TUNG].HighTemperature;
 	double startTemp = (MELTING_POINT - 1500.0);
 	double tempOver = (((cpart->temp - startTemp)/1500.0)*M_PI) - (M_PI/2.0);
 	if(tempOver > -(M_PI/2.0))

@@ -6,6 +6,8 @@
 #include <cassert>
 #include <dirent.h>
 #include <fstream>
+#include <iostream>
+#include <stack>
 #include <sys/stat.h>
 
 #ifdef WIN
@@ -28,7 +30,6 @@
 #endif
 
 #include "Misc.h"
-#include "client/Client.h"
 
 namespace Platform
 {
@@ -38,8 +39,32 @@ std::string sharedCwd;
 
 ByteString GetCwd()
 {
-	char *cwd = getcwd(NULL, 0);
-	return cwd == nullptr ? "" : cwd;
+#if defined(WIN)
+	using Char = wchar_t;
+# define getcwd _wgetcwd
+#else
+	using Char = char;
+#endif
+	std::vector<Char> buf;
+	while (true)
+	{
+		buf.resize(buf.size() + 1000U);
+		if (getcwd(&buf[0], buf.size()))
+		{
+			break;
+		}
+		if (errno != ERANGE)
+		{
+			perror(MTOS(getcwd) ": ");
+			return "";
+		}
+	}
+#if defined(WIN)
+	return WinNarrow(&buf[0]);
+# undef getcwd
+#else
+	return &buf[0];
+#endif
 }
 
 ByteString ExecutableName()
@@ -116,7 +141,7 @@ void DoRestart()
 		else
 		{
 #if !defined(RENDERER) && !defined(FONTEDITOR)
-			Client::Ref().Shutdown(); // very ugly hack; will fix soon(tm)
+			// Client::Ref().Shutdown(); // very ugly hack; will fix soon(tm)
 #endif
 			exit(0);
 		}
@@ -237,6 +262,39 @@ bool FileExists(ByteString filename)
 	}
 }
 
+ByteString ParentDirectory(ByteString path)
+{
+#ifdef WIN
+	auto wpath = WinWiden(path);
+	std::vector<wchar_t> buf(wpath.size() + 1);
+	std::copy(wpath.begin(), wpath.end(), buf.begin()); // std::wstring::c_str returns const char *, must copy :(
+	buf[wpath.size()] = 0;
+	if (!PathRemoveFileSpecW(&buf[0]))
+	{
+		return "";
+	}
+	return WinNarrow(&buf[0]);
+#else
+	for (auto i = int(path.size()) - 1; i >= 0; --i)
+	{
+		if (path[i] == '/')
+		{
+			while (i > 0 && path[i - 1] == '/')
+			{
+				i -= 1;
+			}
+			if (i == 0 && path.size() > 1)
+			{
+				return "/";
+			}
+			// Returns "" if i == 0, which happens to be what we want.
+			return path.Substr(0, i);
+		}
+	}
+	return "";
+#endif
+}
+
 bool DirectoryExists(ByteString directory)
 {
 #ifdef WIN
@@ -265,6 +323,12 @@ bool DirectoryExists(ByteString directory)
 bool RemoveFile(ByteString filename)
 {
 	return std::remove(filename.c_str()) == 0;
+}
+
+// * TODO-REDO_UI: Widen everything on windows.
+bool RenameFile(ByteString from, ByteString to)
+{
+	return std::rename(from.c_str(), to.c_str()) == 0;
 }
 
 bool DeleteDirectory(ByteString folder)
@@ -307,8 +371,7 @@ std::vector<ByteString> DirectorySearch(ByteString directory, ByteString search,
 	do
 	{
 		ByteString currentFileName = Platform::WinNarrow(currentFile.name);
-		if (currentFileName.length() > 4)
-			directoryList.push_back(currentFileName);
+		directoryList.push_back(currentFileName);
 	}
 	while (_wfindnext(findFileHandle, &currentFile) == 0);
 	_findclose(findFileHandle);
@@ -323,8 +386,7 @@ std::vector<ByteString> DirectorySearch(ByteString directory, ByteString search,
 	while ((directoryEntry = readdir(directoryHandle)))
 	{
 		ByteString currentFileName = ByteString(directoryEntry->d_name);
-		if (currentFileName.length()>4)
-			directoryList.push_back(currentFileName);
+		directoryList.push_back(currentFileName);
 	}
 	closedir(directoryHandle);
 #endif
@@ -332,16 +394,16 @@ std::vector<ByteString> DirectorySearch(ByteString directory, ByteString search,
 	search = search.ToLower();
 
 	std::vector<ByteString> searchResults;
-	for (std::vector<ByteString>::iterator iter = directoryList.begin(), end = directoryList.end(); iter != end; ++iter)
+	for (auto &filename : directoryList)
 	{
-		ByteString filename = *iter, tempfilename = *iter;
+		auto tempfilename = filename;
 		bool extensionMatch = !extensions.size();
-		for (std::vector<ByteString>::iterator extIter = extensions.begin(), extEnd = extensions.end(); extIter != extEnd; ++extIter)
+		for (auto &ext : extensions)
 		{
-			if (filename.EndsWith(*extIter))
+			if (filename.EndsWith(ext))
 			{
 				extensionMatch = true;
-				tempfilename = filename.SubstrFromEnd(0, (*extIter).size()).ToLower();
+				tempfilename = filename.SubstrFromEnd(0, ext.size()).ToLower();
 				break;
 			}
 		}
@@ -387,7 +449,7 @@ String DoMigration(ByteString fromDir, ByteString toDir)
 	std::stack<ByteString> dirsToDelete;
 
 	// Migrate a list of files
-	auto migrateList = [&](std::vector<ByteString> list, ByteString directory, String niceName) {
+	auto migrateList = [&result, &toDir, &fromDir, &logFile, &dirsToDelete](std::vector<ByteString> list, ByteString directory, String niceName) {
 		result << '\n' << niceName << ": ";
 		if (!list.empty() && !directory.empty())
 			MakeDirectory(toDir + directory);
@@ -398,7 +460,7 @@ String DoMigration(ByteString fromDir, ByteString toDir)
 			std::string to = toDir + directory + "/" + item;
 			if (!FileExists(to))
 			{
-				if (rename(from.c_str(), to.c_str()))
+				if (RenameFile(from, to))
 				{
 					failedCount++;
 					logFile << "failed to move " << from << " to " << to << std::endl;
@@ -428,7 +490,7 @@ String DoMigration(ByteString fromDir, ByteString toDir)
 		ByteString to = toDir + filename;
 		if (!FileExists(to))
 		{
-			if (rename(from.c_str(), to.c_str()))
+			if (RenameFile(from, to))
 			{
 				logFile << "failed to move " << from << " to " << to << std::endl;
 				result << "\n\br" << filename.FromUtf8() << " migration failed\x0E";
@@ -482,8 +544,8 @@ String DoMigration(ByteString fromDir, ByteString toDir)
 	chdir(toDir.c_str());
 
 #if !defined(RENDERER) && !defined(FONTEDITOR)
-	if (scripts.size())
-		Client::Ref().RescanStamps();
+	// if (scripts.size())
+		// Client::Ref().RescanStamps();
 #endif
 
 	logFile << std::endl << std::endl << "Migration complete. Results: " << result.Build().ToUtf8();
@@ -500,7 +562,7 @@ ByteString WinNarrow(const std::wstring &source)
 	{
 		return "";
 	}
-	std::string output(buffer_size, 0);
+	ByteString output(buffer_size, 0);
 	if (!WideCharToMultiByte(CP_UTF8, 0, source.c_str(), source.size(), &output[0], buffer_size, NULL, NULL))
 	{
 		return "";
@@ -523,6 +585,63 @@ std::wstring WinWiden(const ByteString &source)
 	return output;
 }
 #endif
+
+void OpenDataFolder()
+{
+	auto cwd = GetCwd();
+	if (cwd.size())
+	{
+		Platform::OpenURI(cwd);
+	}
+	else
+	{
+		fprintf(stderr, "cannot open data folder: getcwd(...) failed\n");
+	}
+}
+
+bool WriteFile(std::vector<char> data, ByteString path)
+{
+	try
+	{
+		std::ofstream f(path, std::ios::binary);
+		if (f)
+		{
+			f.write(&data[0], data.size());
+		}
+		if (f)
+		{
+			return true;
+		}
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << "WriteFile: " << e.what() << std::endl;
+	}
+	return false;
+}
+
+std::vector<char> ReadFile(ByteString path)
+{
+	std::vector<char> data;
+	try
+	{
+		std::ifstream f(path, std::ios::binary);
+		if (f)
+		{
+			f.seekg(0, std::ios::end);
+			auto size = f.tellg();
+			data.resize(size);
+			f.seekg(0);
+			f.read(&data[0], size);
+		}
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << "Readfile: " << e.what() << std::endl;
+		throw;
+	}
+	return data;
+}
 
 }
 

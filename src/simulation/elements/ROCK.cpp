@@ -7,7 +7,7 @@ void Element::Element_ROCK()
 {
 	Identifier = "DEFAULT_PT_ROCK";
 	Name = "ROCK";
-	Colour = PIXPACK(0x727272);
+	Colour = 0x727272;
 	MenuVisible = 1;
 	MenuSection = SC_SOLIDS;
 	Enabled = 1;
@@ -30,7 +30,6 @@ void Element::Element_ROCK()
 	Weight = 100;
 
 	HeatConduct = 200;
-	Description = "Rock. Solid material, CNCT can stack on top of it.";
 
 	Properties = TYPE_SOLID | PROP_HOT_GLOW;
 

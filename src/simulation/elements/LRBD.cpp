@@ -4,7 +4,7 @@ void Element::Element_LRBD()
 {
 	Identifier = "DEFAULT_PT_LRBD";
 	Name = "LRBD";
-	Colour = PIXPACK(0xAAAAAA);
+	Colour = 0xAAAAAA;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -28,7 +28,6 @@ void Element::Element_LRBD()
 
 	DefaultProperties.temp = R_TEMP + 45.0f + 273.15f;
 	HeatConduct = 170;
-	Description = "Liquid Rubidium.";
 
 	Properties = TYPE_LIQUID|PROP_CONDUCTS|PROP_LIFE_DEC;
 

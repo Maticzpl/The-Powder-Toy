@@ -4,7 +4,7 @@ void Element::Element_NITR()
 {
 	Identifier = "DEFAULT_PT_NITR";
 	Name = "NITR";
-	Colour = PIXPACK(0x20E010);
+	Colour = 0x20E010;
 	MenuVisible = 1;
 	MenuSection = SC_EXPLOSIVE;
 	Enabled = 1;
@@ -28,7 +28,6 @@ void Element::Element_NITR()
 	Weight = 23;
 
 	HeatConduct = 50;
-	Description = "Nitroglycerin. Pressure sensitive explosive. Mix with CLST to make TNT.";
 
 	Properties = TYPE_LIQUID;
 

@@ -19,7 +19,7 @@
 #include "ElementGraphics.h"
 #include "Simulation.h"
 
-#include "graphics/Renderer.h"
+#include "graphics/SimulationRenderer.h"
 
 #define IPL -257.0f
 #define IPH 257.0f
