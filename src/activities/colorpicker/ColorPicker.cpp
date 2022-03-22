@@ -222,19 +222,26 @@ namespace activities::colorpicker
 		Size(windowSize);
 		Position((parentSize - windowSize) / 2);
 
-		auto deco = game::Game::Ref().DecoColor();
-		color = {
-			PixR(deco) / 255.f,
-			PixG(deco) / 255.f,
-			PixB(deco) / 255.f,
-			PixA(deco) / 255.f,
-		};
-		Pick(inputCount);
+		Pick(inputCount); // * This invalid input index acts like a "take colour from game::Game" command.
 	}
 
 	void ColorPicker::Pick(InputName input)
 	{
-		auto group = inputs[input].group; // TODO: input cannot be used here yet
+		auto group = inputGroupCount;
+		if (input < inputCount)
+		{
+			group = inputs[input].group;
+		}
+		else
+		{
+			auto deco = game::Game::Ref().DecoColor();
+			color = {
+				PixR(deco) / 255.f,
+				PixG(deco) / 255.f,
+				PixB(deco) / 255.f,
+				PixA(deco) / 255.f,
+			};
+		}
 		InputBlock ib;
 		for (auto i = 0; i < inputGroupCount; ++i)
 		{

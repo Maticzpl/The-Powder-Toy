@@ -19,7 +19,6 @@ namespace backend
 		{
 			user.detailLevel = UserInfo::detailLevelSession;
 		}
-		assert(user.name != "LBPHacker"); // * TODO-REDO_UI: Remove.
 	}
 
 	void Backend::User(UserInfo newUser)
