@@ -335,6 +335,7 @@ namespace language
 		auto it = templates.find(id);
 		if (it == templates.end())
 		{
+			std::cerr << "unknown language template " << id.ToUtf8() << std::endl;
 			return String::Build("#", id);
 		}
 		StringBuilder sb;

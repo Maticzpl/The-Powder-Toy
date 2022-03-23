@@ -204,18 +204,22 @@ namespace activities::browser
 		auto contentToThumbnail = gui::Point{ 1, 1 };
 		auto contentSize = thumbnailSize + gui::Point{ 2, 2 + 2 * FONT_H };
 		auto contentRect = gui::Rect{ (Size() - contentSize) - (Size() - contentSize) / 2, contentSize };
+		if (drawBars)
+		{
+			contentRect.pos.x -= 3;
+		}
 		drawContentAt = contentRect.pos;
 		auto thumbnailRect = gui::Rect{ contentRect.pos + contentToThumbnail, thumbnailSize };
 		drawThumbnailAt = thumbnailRect.pos;
 		TextRect(thumbnailRect);
 		BackgroundRect(thumbnailRect);
-		auto fitText = [contentRect](gui::Point &drawAt, String &toDraw, const String &source, int y) {
+		auto fitText = [this](gui::Point &drawAt, String &toDraw, const String &source, int y) {
 			gui::Point ts;
-			gui::SDLWindow::Ref().TruncateText(toDraw, ts, source, thumbnailSize.x + 9, "...");
-			drawAt = contentRect.pos + gui::Point{ (contentRect.size.x - ts.x) / 2, y };
+			gui::SDLWindow::Ref().TruncateText(toDraw, ts, source, Size().x - 10, "...");
+			drawAt = gui::Point{ (Size().x - ts.x) - (Size().x - ts.x) / 2, y };
 		};
-		fitText(drawNameAt, nameToDraw, name, contentRect.pos.y + contentRect.size.y - 2 * FONT_H - 1);
-		fitText(drawGroupAt, groupToDraw, group, contentRect.pos.y + contentRect.size.y - FONT_H - 1);
+		fitText(drawNameAt, nameToDraw, name, contentRect.pos.y + contentRect.size.y - 2 * FONT_H + 1);
+		fitText(drawGroupAt, groupToDraw, group, contentRect.pos.y + contentRect.size.y - FONT_H + 1);
 		VoteBars::ScaleVoteBars(barHeightUp, barHeightDown, scaleBarUpTo - 1, scaleBarDownTo - 1, scoreUp, scoreDown);
 		{
 			auto ts = gui::SDLWindow::Ref().TextSize(scoreToDraw);

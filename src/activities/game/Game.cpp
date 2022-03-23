@@ -633,20 +633,20 @@ namespace activities::game
 			rendererPresetButtons.push_back(std::make_tuple(preset, button));
 		};
 
-		addPresetButton(10, gui::ColorString({ 0xFF, 0xFF, 0xFF }) + gui::IconString(gui::Icons::life         , {  0, -1 }), "DEFAULT_LS_GAME_PRESET_LIFEGRADIENT"_Ls());
+		addPresetButton(10, gui::ColorString({ 0xFF, 0xFF, 0xFF }) + gui::IconString(gui::Icons::life         , {  0, -1 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_LIFEGRADIENT"_Ls());
 		addPresetButton( 0, gui::ColorString({ 0xFF, 0x37, 0x37 }) + gui::IconString(gui::Icons::altAirBody   , {  0, -1 }) + gui::StepBackString() +
-		                    gui::ColorString({ 0x37, 0xFF, 0x37 }) + gui::IconString(gui::Icons::altAirOutline, {  0, -1 }), "DEFAULT_LS_GAME_PRESET_ALTVELOCITY"_Ls());
-		addPresetButton( 9, gui::ColorString({ 0xCD, 0x32, 0xCD }) + gui::IconString(gui::Icons::gradient     , {  0, -1 }), "DEFAULT_LS_GAME_PRESET_HEATGRADIENT"_Ls());
-		addPresetButton( 8, gui::ColorString({ 0xFF, 0xFF, 0xC8 }) + gui::IconString(gui::Icons::basic        , {  0, -1 }), "DEFAULT_LS_GAME_PRESET_NOTHING"_Ls());
-		addPresetButton( 7, gui::ColorString({ 0x64, 0x96, 0xFF }) + gui::IconString(gui::Icons::liquid       , { -1, -2 }), "DEFAULT_LS_GAME_PRESET_FANCY"_Ls());
+		                    gui::ColorString({ 0x37, 0xFF, 0x37 }) + gui::IconString(gui::Icons::altAirOutline, {  0, -1 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_ALTVELOCITY"_Ls());
+		addPresetButton( 9, gui::ColorString({ 0xCD, 0x32, 0xCD }) + gui::IconString(gui::Icons::gradient     , {  0, -1 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_HEATGRADIENT"_Ls());
+		addPresetButton( 8, gui::ColorString({ 0xFF, 0xFF, 0xC8 }) + gui::IconString(gui::Icons::basic        , {  0, -1 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_NOTHING"_Ls());
+		addPresetButton( 7, gui::ColorString({ 0x64, 0x96, 0xFF }) + gui::IconString(gui::Icons::liquid       , { -1, -2 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_FANCY"_Ls());
 		addPresetButton( 6, gui::ColorString({ 0xFF, 0x00, 0x00 }) + gui::IconString(gui::Icons::heatBody     , {  0, -2 }) + gui::StepBackString() +
-		                    gui::ColorString({ 0xFF, 0xFF, 0xFF }) + gui::IconString(gui::Icons::heatOutline  , {  0, -2 }), "DEFAULT_LS_GAME_PRESET_HEAT"_Ls());
-		addPresetButton( 5, gui::ColorString({ 0x37, 0xFF, 0x37 }) + gui::IconString(gui::Icons::blob         , { -1, -2 }), "DEFAULT_LS_GAME_PRESET_BLOB"_Ls());
+		                    gui::ColorString({ 0xFF, 0xFF, 0xFF }) + gui::IconString(gui::Icons::heatOutline  , {  0, -2 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_HEAT"_Ls());
+		addPresetButton( 5, gui::ColorString({ 0x37, 0xFF, 0x37 }) + gui::IconString(gui::Icons::blob         , { -1, -2 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_BLOB"_Ls());
 		addPresetButton( 4, gui::ColorString({ 0xFF, 0x00, 0x00 }) + gui::IconString(gui::Icons::fireBody     , {  0, -1 }) + gui::StepBackString() +
-		                    gui::ColorString({ 0xFF, 0xFF, 0x40 }) + gui::IconString(gui::Icons::fireOutline  , {  0, -1 }), "DEFAULT_LS_GAME_PRESET_FIRE"_Ls());
-		addPresetButton( 3, gui::ColorString({ 0xD4, 0xD4, 0xD4 }) + gui::IconString(gui::Icons::persistent   , {  0, -1 }), "DEFAULT_LS_GAME_PRESET_PERSISTENT"_Ls());
-		addPresetButton( 2, gui::ColorString({ 0xFF, 0xD4, 0x20 }) + gui::IconString(gui::Icons::sensor       , {  0, -1 }), "DEFAULT_LS_GAME_PRESET_PRESSURE"_Ls());
-		addPresetButton( 1, gui::ColorString({ 0x80, 0xA0, 0xFF }) + gui::IconString(gui::Icons::velocity     , {  0, -1 }), "DEFAULT_LS_GAME_PRESET_VELOCITY"_Ls());
+		                    gui::ColorString({ 0xFF, 0xFF, 0x40 }) + gui::IconString(gui::Icons::fireOutline  , {  0, -1 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_FIRE"_Ls());
+		addPresetButton( 3, gui::ColorString({ 0xD4, 0xD4, 0xD4 }) + gui::IconString(gui::Icons::persistent   , {  0, -1 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_PERSISTENT"_Ls());
+		addPresetButton( 2, gui::ColorString({ 0xFF, 0xD4, 0x20 }) + gui::IconString(gui::Icons::sensor       , {  0, -1 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_PRESSURE"_Ls());
+		addPresetButton( 1, gui::ColorString({ 0x80, 0xA0, 0xFF }) + gui::IconString(gui::Icons::velocity     , {  0, -1 }), "DEFAULT_LS_ACTION_DEFAULT_AC_USEPRESET_VELOCITY"_Ls());
 
 		UpdateGroups();
 		UpdateOnlineControls();
@@ -1475,7 +1475,11 @@ namespace activities::game
 		auto &state = states[index];
 		button->Stuck(state.stuck);
 		button->Enabled(state.enabled);
-		button->ToolTip()->text = language::Template{ state.toolTipTemplate }();
+		button->ToolTip()->text.clear();
+		if (state.toolTipTemplate.size())
+		{
+			button->ToolTip()->text = language::Template{ state.toolTipTemplate }();
+		}
 	}
 
 	void Game::UpdateSaveControls()
