@@ -392,7 +392,7 @@ namespace gui
 #ifdef DEBUG
 			if (sdlEvent.type == SDL_KEYDOWN && !sdlEvent.key.repeat)
 			{
-				if (ev.key.scan == SDL_SCANCODE_SCROLLLOCK)
+				if (ev.key.sym == SDLK_SCROLLLOCK)
 				{
 					nudgingComponents = !nudgingComponents;
 					drawComponentRects = nudgingComponents;
@@ -407,12 +407,12 @@ namespace gui
 					auto changed = false;
 					auto insertChild = false;
 					auto removeChild = false;
-					if (ev.key.scan == SDL_SCANCODE_UP    ) { changed = true;      delta->y = -1; }
-					if (ev.key.scan == SDL_SCANCODE_DOWN  ) { changed = true;      delta->y =  1; }
-					if (ev.key.scan == SDL_SCANCODE_LEFT  ) { changed = true;      delta->x = -1; }
-					if (ev.key.scan == SDL_SCANCODE_RIGHT ) { changed = true;      delta->x =  1; }
-					if (ev.key.scan == SDL_SCANCODE_INSERT) { changed = true; insertChild = true; }
-					if (ev.key.scan == SDL_SCANCODE_DELETE) { changed = true; removeChild = true; }
+					if (ev.key.sym == SDLK_UP    ) { changed = true;      delta->y = -1; }
+					if (ev.key.sym == SDLK_DOWN  ) { changed = true;      delta->y =  1; }
+					if (ev.key.sym == SDLK_LEFT  ) { changed = true;      delta->x = -1; }
+					if (ev.key.sym == SDLK_RIGHT ) { changed = true;      delta->x =  1; }
+					if (ev.key.sym == SDLK_INSERT) { changed = true; insertChild = true; }
+					if (ev.key.sym == SDLK_DELETE) { changed = true; removeChild = true; }
 					if (modCtrl)
 					{
 						*delta *= 10;

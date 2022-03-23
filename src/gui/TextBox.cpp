@@ -512,11 +512,8 @@ namespace gui
 				return true;
 			}
 			return false;
-		}
 
-		switch (scan)
-		{
-		case SDL_SCANCODE_A:
+		case SDLK_a:
 			if (SDLWindow::Ref().ModCtrl())
 			{
 				if (!repeat)
@@ -527,7 +524,7 @@ namespace gui
 			}
 			break;
 
-		case SDL_SCANCODE_C:
+		case SDLK_c:
 			if (SDLWindow::Ref().ModCtrl())
 			{
 				if (allowCopy && !repeat)
@@ -538,7 +535,7 @@ namespace gui
 			}
 			break;
 
-		case SDL_SCANCODE_V:
+		case SDLK_v:
 			if (SDLWindow::Ref().ModCtrl())
 			{
 				Paste();
@@ -546,7 +543,7 @@ namespace gui
 			}
 			break;
 
-		case SDL_SCANCODE_X:
+		case SDLK_x:
 			if (SDLWindow::Ref().ModCtrl())
 			{
 				if (allowCopy && !repeat)
