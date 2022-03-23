@@ -60,12 +60,7 @@ namespace activities::console
 
 		bottomDragger = EmplaceChild<gui::Dragger>().get();
 		bottomDragger->Drag([this]() {
-			Size({ windowSize.x, bottomDragger->Position().y });
-			MouseForwardRect({ { 0, 0 }, Size() + gui::Point{ 0, 4 } });
-			sp->Size({ Size().x, Size().y - 18 });
-			splitDragger->Size({ 4, Size().y - 18 });
-			splitDragger->AllowedRect({ { 1 + inputMinWidth, 1 }, { windowSize.x - 2 - inputMinWidth - outputMinWidth, Size().y - 18 } });
-			inputBox->Position({ 3, Size().y - 18 });
+			UpdateLayout();
 		});
 		bottomDragger->AllowedRect({ { 0, windowMinHeight }, { windowSize.x, windowSize.y - windowMinHeight } });
 		bottomDragger->Position({ 0, windowHeightDefault });
@@ -74,6 +69,8 @@ namespace activities::console
 		splitDragger->Position({ 1 + inputWidthDefault, 1 });
 
 		UpdatePlaceHolder(commandOk);
+		UpdateEntryLayout();
+		UpdateLayout();
 		inputBox->Focus();
 	}
 
@@ -201,6 +198,16 @@ namespace activities::console
 		g.DrawLine(abs + gui::Point{ 0, size.y -  1 }, abs + gui::Point{ size.x, size.y -  1 }, c.border);
 		g.DrawLine(abs + gui::Point{ 0, size.y      }, abs + gui::Point{ size.x, size.y      }, c.shadow);
 		ModalWindow::Draw();
+	}
+
+	void Console::UpdateLayout()
+	{
+		Size({ windowSize.x, bottomDragger->Position().y });
+		MouseForwardRect({ { 0, 0 }, Size() + gui::Point{ 0, 4 } });
+		sp->Size({ Size().x, Size().y - 18 });
+		splitDragger->Size({ 4, Size().y - 18 });
+		splitDragger->AllowedRect({ { 1 + inputMinWidth, 1 }, { windowSize.x - 2 - inputMinWidth - outputMinWidth, Size().y - 18 } });
+		inputBox->Position({ 3, Size().y - 18 });
 	}
 
 	void Console::UpdateEntryLayout()

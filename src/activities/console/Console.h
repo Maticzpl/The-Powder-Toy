@@ -44,6 +44,7 @@ namespace activities::console
 		gui::Dragger *splitDragger = nullptr;
 
 		void ScrollEntryIntoView(HistoryEntry *entry);
+		void UpdateLayout();
 		void UpdateEntryLayout();
 		CommandResult Validate(const String &input, String &output);
 		CommandResult Execute(const String &input, String &output);
