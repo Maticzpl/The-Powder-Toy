@@ -34,10 +34,10 @@ namespace graphics
 		};
 		Configuration conf;
 
+		void Process() final override;
+
 	public:
 		gui::Image output;
-
-		void Start(std::shared_ptr<common::Task> self) final override;
 
 		static std::shared_ptr<ThumbnailRendererTask> Create(Configuration conf);
 

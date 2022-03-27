@@ -41,7 +41,7 @@ namespace activities::browser
 		Path path;
 		int page;
 
-		void Process()
+		void Process() final override
 		{
 			auto extension = String(".cps");
 			std::vector<SaveInfo> unfiltered;
@@ -99,17 +99,9 @@ namespace activities::browser
 		int saveCount;
 		std::vector<SaveInfo> saves;
 
-		void Start(std::shared_ptr<common::Task> self) final override
-		{
-			common::Worker::Ref().Dispatch(std::static_pointer_cast<common::WorkerTask>(self));
-		}
-
 		SearchSavesTask(Path newPath, int newPage) : path(newPath), page(newPage)
 		{
 			progressIndeterminate = true;
-			process = [](WorkerTask &self) {
-				static_cast<SearchSavesTask &>(self).Process();
-			};
 		}
 	};
 

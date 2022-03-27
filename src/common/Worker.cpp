@@ -30,10 +30,7 @@ namespace common
 				auto ptr = wptr.lock();
 				if (ptr)
 				{
-					if (ptr->process)
-					{
-						ptr->process(*ptr);
-					}
+					ptr->Process();
 					ptr->complete = true;
 				}
 				else
@@ -61,5 +58,11 @@ namespace common
 			workerQu.push(std::weak_ptr(task));
 		}
 		workerCv.notify_one();
+	}
+
+
+	void WorkerTask::Start(std::shared_ptr<common::Task> self)
+	{
+		common::Worker::Ref().Dispatch(std::static_pointer_cast<common::WorkerTask>(self));
 	}
 }

@@ -26,7 +26,7 @@ namespace activities::save
 		Path path;
 		std::shared_ptr<const GameSave> save;
 
-		void Process()
+		void Process() final override
 		{
 			auto data = save->Serialise();
 			if (!data.size())
@@ -45,17 +45,9 @@ namespace activities::save
 		}
 
 	public:
-		void Start(std::shared_ptr<common::Task> self) final override
-		{
-			common::Worker::Ref().Dispatch(std::static_pointer_cast<common::WorkerTask>(self));
-		}
-
 		WriteSaveTask(Path newPath, std::shared_ptr<GameSave> newSave) : path(newPath), save(newSave)
 		{
 			progressIndeterminate = true;
-			process = [](WorkerTask &self) {
-				static_cast<WriteSaveTask &>(self).Process();
-			};
 		}
 	};
 

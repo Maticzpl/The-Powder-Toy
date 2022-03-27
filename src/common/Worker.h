@@ -13,7 +13,14 @@
 
 namespace common
 {
-	struct WorkerTask;
+	struct WorkerTask : public common::Task
+	{
+		virtual ~WorkerTask() = default;
+
+		virtual void Process() = 0;
+
+		void Start(std::shared_ptr<common::Task> self) final override;
+	};
 
 	class Worker : public ExplicitSingleton<Worker>
 	{
@@ -28,10 +35,5 @@ namespace common
 		~Worker();
 
 		void Dispatch(std::shared_ptr<WorkerTask> task);
-	};
-
-	struct WorkerTask : public common::Task
-	{
-		void (*process)(WorkerTask &) = nullptr;
 	};
 }

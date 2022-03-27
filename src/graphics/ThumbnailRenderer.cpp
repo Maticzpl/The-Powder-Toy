@@ -89,15 +89,12 @@ namespace graphics
 	std::shared_ptr<ThumbnailRendererTask> ThumbnailRendererTask::Create(Configuration conf)
 	{
 		auto task = std::make_shared<ThumbnailRendererTask>();
-		task->process = [](common::WorkerTask &task) {
-			ThumbnailRenderer::Ref().Process(static_cast<ThumbnailRendererTask &>(task));
-		};
 		task->conf = conf;
 		return task;
 	}
 
-	void ThumbnailRendererTask::Start(std::shared_ptr<common::Task> self)
+	void ThumbnailRendererTask::Process()
 	{
-		common::Worker::Ref().Dispatch(std::static_pointer_cast<common::WorkerTask>(self));
+		ThumbnailRenderer::Ref().Process(*this);
 	}
 }
