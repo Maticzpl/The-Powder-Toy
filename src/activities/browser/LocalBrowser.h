@@ -20,12 +20,22 @@ namespace graphics
 namespace activities::browser
 {
 	class SearchSavesTask;
+	class ReadSaveTask;
+
+	struct SearchSavesResult
+	{
+		Path path;
+		String displayName;
+	};
 
 	class LocalBrowser : public Browser
 	{
 		struct SaveButtonInfo : Browser::SaveButtonInfo
 		{
+			std::shared_ptr<ReadSaveTask> readSave;
 			std::shared_ptr<graphics::ThumbnailRendererTask> saveRender;
+			std::shared_ptr<GameSave> save;
+			gui::Point saveDataSizeB;
 			String displayName;
 			String path;
 		};
@@ -42,6 +52,7 @@ namespace activities::browser
 
 		void LocalSearchStart(
 			bool force,
+			Path newSearchRoot,
 			String newQuery,
 			bool resetQueryBox,
 			int newPage,
@@ -53,6 +64,9 @@ namespace activities::browser
 
 		std::shared_ptr<SearchSavesTask> searchSaves;
 		void SearchSavesFinish();
+
+		std::vector<SearchSavesResult> savesFound;
+		void ShowPage();
 
 		gui::Button *deleteButton = nullptr;
 		void UpdateSaveControls() final override;

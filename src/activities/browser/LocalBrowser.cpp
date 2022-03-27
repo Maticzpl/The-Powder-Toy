@@ -26,32 +26,59 @@
 
 namespace activities::browser
 {
-	class SearchSavesTask : public common::WorkerTask
+	class ReadSaveTask : public common::WorkerTask
 	{
-	public:
-		struct SaveInfo
-		{
-			Path path;
-			String displayName;
-			std::shared_ptr<GameSave> save;
-			gui::Point saveDataSizeB;
-		};
+		const Path path;
 
 	private:
-		Path path;
-		int page;
+		void Process() final override
+		{
+			auto saveData = Platform::ReadFile(String(path).ToUtf8());
+			if (!saveData.size())
+			{
+				error = "failed to open file";
+				status = false;
+				return;
+			}
+			try
+			{
+				save = std::make_shared<GameSave>(saveData);
+				save->Expand();
+				save->BlockSizeAfterExtract(0, 0, 0, saveDataSizeB.x, saveDataSizeB.y);
+			}
+			catch (const ParseException &e)
+			{
+				error = ByteString(e.what()).FromUtf8();
+				status = false;
+				return;
+			}
+			status = true;
+		}
+
+	public:
+		std::shared_ptr<GameSave> save;
+		gui::Point saveDataSizeB;
+
+		ReadSaveTask(const Path newPath) : path(newPath)
+		{
+			progressIndeterminate = true;
+		}
+	};
+
+	class SearchSavesTask : public common::WorkerTask
+	{
+		const Path path;
 
 		void Process() final override
 		{
 			auto extension = String(".cps");
-			std::vector<SaveInfo> unfiltered;
 			for (auto &name : Platform::DirectorySearch(String(path).ToUtf8(), "", {}))
 			{
 				if (name == "." || name == "..")
 				{
 					continue;
 				}
-				SaveInfo info;
+				SearchSavesResult info;
 				info.path = path.Append(name.FromUtf8());
 				auto pathStr = String(info.path);
 				if (pathStr.EndsWith(extension))
@@ -62,44 +89,19 @@ namespace activities::browser
 				{
 					continue;
 				}
-				unfiltered.push_back(info);
+				pageItems.push_back(info);
 			}
-			std::sort(unfiltered.begin(), unfiltered.end(), [](const SaveInfo &lhs, const SaveInfo &rhs) {
+			std::sort(pageItems.begin(), pageItems.end(), [](const SearchSavesResult &lhs, const SearchSavesResult &rhs) {
 				if (lhs.displayName != rhs.displayName) return lhs.displayName < rhs.displayName;
 				return false;
 			});
-			for (auto i = page * pageSize; i < (page + 1) * pageSize && i < int(unfiltered.size()); ++i)
-			{
-				auto &info = unfiltered[i];
-				try
-				{
-					auto saveData = Platform::ReadFile(String(info.path).ToUtf8());
-					if (saveData.size())
-					{
-						info.save = std::make_shared<GameSave>(saveData);
-						info.save->Expand();
-						info.save->BlockSizeAfterExtract(0, 0, 0, info.saveDataSizeB.x, info.saveDataSizeB.y);
-					}
-					else
-					{
-						std::cerr << "skipping save " << String(info.path).ToUtf8() << ": failed to open" << std::endl;
-					}
-				}
-				catch (const ParseException &e)
-				{
-					info.save.reset();
-					// * TODO-REDO_UI: Do something with this.
-				}
-				saves.push_back(info);
-			}
 			status = true;
 		}
 
 	public:
-		int saveCount;
-		std::vector<SaveInfo> saves;
+		std::vector<SearchSavesResult> pageItems;
 
-		SearchSavesTask(Path newPath, int newPage) : path(newPath), page(newPage)
+		SearchSavesTask(const Path newPath) : path(newPath)
 		{
 			progressIndeterminate = true;
 		}
@@ -131,7 +133,7 @@ namespace activities::browser
 		searchSortDrop->Position({ windowSize.x - 74, 4 });
 		searchSortDrop->Size({ 70, 17 });
 		searchSortDrop->Change([this](int value) {
-			LocalSearchStart(false, query, false, 0, true, SearchSort(value), false);
+			LocalSearchStart(false, searchRoot, query, false, 0, true, SearchSort(value), false);
 		});
 
 		saveControls.push_back(deleteButton);
@@ -142,6 +144,7 @@ namespace activities::browser
 
 	void LocalBrowser::LocalSearchStart(
 		bool force,
+		Path newSearchRoot,
 		String newQuery,
 		bool resetQueryBox,
 		int newPage,
@@ -151,6 +154,7 @@ namespace activities::browser
 	)
 	{
 		if (!force &&
+		    newSearchRoot == searchRoot &&
 		    newSearchSort == searchSort &&
 		    newPage == pagination->Page() &&
 		    newQuery == query)
@@ -162,8 +166,44 @@ namespace activities::browser
 			return;
 		}
 		Browser::SearchStart(force, newQuery, resetQueryBox, newPage, resetPageBox);
-		searchSaves = std::make_shared<SearchSavesTask>(searchRoot, pagination->Page());
-		searchSaves->Start(searchSaves);
+		if (force || newSearchRoot != searchRoot)
+		{
+			searchRoot = newSearchRoot;
+			searchSaves = std::make_shared<SearchSavesTask>(searchRoot);
+			searchSaves->Start(searchSaves);
+		}
+		else
+		{
+			ShowPage();
+		}
+	}
+
+	void LocalBrowser::ShowPage()
+	{
+		auto page = pagination->Page();
+		for (auto i = page * pageSize; i < (page + 1) * pageSize && i < int(savesFound.size()); ++i)
+		{
+			auto &item = savesFound[i];
+			auto *button = EmplaceChild<Button>(item.displayName, "", 0, 0, false, false).get();
+			button->Select([this](bool selected) {
+				UpdateSaveControls();
+			});
+			auto sbi = std::make_unique<SaveButtonInfo>();
+			sbi->button = button;
+			sbi->path = item.path;
+			sbi->displayName = item.displayName;
+			sbi->slot = i;
+			sbi->readSave = std::make_shared<ReadSaveTask>(item.path);
+			sbi->readSave->Start(sbi->readSave);
+			saveButtonsToDisplay.push_back(sbi.get());
+			saveButtons.push_back(std::move(sbi));
+		}
+		DisplaySaveButtons();
+		if (!savesFound.size())
+		{
+			errorStatic->Visible(true);
+			errorStatic->Text("DEFAULT_LS_BROWSER_NOSAVES"_Ls());
+		}
 	}
 
 	void LocalBrowser::SearchSavesFinish()
@@ -171,78 +211,15 @@ namespace activities::browser
 		searchSpinner->Visible(false);
 		if (searchSaves->status)
 		{
+			savesFound = searchSaves->pageItems;
+			auto saveCount = int(savesFound.size());
+			auto pageMax = saveCount / pageSize + (saveCount % pageSize ? 1 : 0) - 1;
+			if (pageMax < 0)
 			{
-				auto pageMax = searchSaves->saveCount / pageSize + (searchSaves->saveCount % pageSize ? 1 : 0) - 1;
-				if (pageMax < 0)
-				{
-					pageMax = 0;
-				}
-				pagination->PageMax(pageMax);
+				pageMax = 0;
 			}
-
-			for (auto i = 0; i < int(searchSaves->saves.size()); ++i)
-			{
-				auto &info = searchSaves->saves[i];
-				auto *button = EmplaceChild<Button>(info.displayName, "", 0, 0, false, false).get();
-				button->ContextMenu([this, save = info.save, name = info.displayName, button]() {
-					std::vector<Button::ContextMenuEntry> entries;
-					if (save)
-					{
-						entries.push_back(Button::ContextMenuEntry{ "DEFAULT_LS_BROWSER_CONTEXT_OPEN"_Ls(), [this, save, name]() {
-							Open(name, save);
-						} });
-					}
-					if (button->Selected())
-					{
-						entries.push_back(Button::ContextMenuEntry{ "DEFAULT_LS_BROWSER_CONTEXT_DESELECT"_Ls(), [this, button]() {
-							button->Selected(false);
-							UpdateSaveControls();
-						} });
-					}
-					else
-					{
-						entries.push_back(Button::ContextMenuEntry{ "DEFAULT_LS_BROWSER_CONTEXT_SELECT"_Ls(), [this, button]() {
-							button->Selected(true);
-							UpdateSaveControls();
-						} });
-					}
-					return entries;
-				});
-				button->Click([this, name = info.displayName, save = info.save]() {
-					Open(name, save);
-				});
-				button->Select([this](bool selected) {
-					UpdateSaveControls();
-				});
-				auto sbi = std::make_unique<SaveButtonInfo>();
-				sbi->button = button;
-				sbi->path = info.path;
-				sbi->displayName = info.displayName;
-				sbi->slot = i;
-				if (info.save)
-				{
-					sbi->saveRender = graphics::ThumbnailRendererTask::Create({
-						info.save,
-						true,
-						true,
-						RENDER_BASC | RENDER_FIRE | RENDER_SPRK | RENDER_EFFE,
-						0,
-						COLOUR_DEFAULT,
-						0,
-						{ 0, 0 },
-						{ { 0, 0 }, info.saveDataSizeB },
-					});
-					sbi->saveRender->Start(sbi->saveRender);
-				}
-				saveButtonsToDisplay.push_back(sbi.get());
-				saveButtons.push_back(std::move(sbi));
-			}
-			DisplaySaveButtons();
-			if (!searchSaves->saves.size())
-			{
-				errorStatic->Visible(true);
-				errorStatic->Text("DEFAULT_LS_BROWSER_NOSAVES"_Ls());
-			}
+			pagination->PageMax(pageMax);
+			ShowPage();
 		}
 		else
 		{
@@ -255,13 +232,12 @@ namespace activities::browser
 
 	void LocalBrowser::NavigateTo(Path newSearchRoot)
 	{
-		searchRoot = newSearchRoot;
-		LocalSearchStart(true, "", true, 0, true, searchSort, false);
+		LocalSearchStart(true, newSearchRoot, "", true, 0, true, searchSort, false);
 	}
 
 	void LocalBrowser::SearchStart(bool force, String newQuery, bool resetQueryBox, int newPage, bool resetPageBox)
 	{
-		LocalSearchStart(force, newQuery, resetQueryBox, newPage, resetPageBox, searchSort, false);
+		LocalSearchStart(force, searchRoot, newQuery, resetQueryBox, newPage, resetPageBox, searchSort, false);
 	}
 
 	void LocalBrowser::UpdateTasks()
@@ -273,6 +249,61 @@ namespace activities::browser
 		for (auto &sb : saveButtons)
 		{
 			auto *osb = static_cast<SaveButtonInfo *>(sb.get());
+			if (osb->readSave && osb->readSave->complete)
+			{
+				if (osb->readSave->status)
+				{
+					osb->save = osb->readSave->save;
+					osb->saveDataSizeB = osb->readSave->saveDataSizeB;
+				}
+				else
+				{
+					// * TODO-REDO_UI: Do something with this.
+				}
+				osb->readSave.reset();
+				osb->button->ContextMenu([this, save = osb->save, name = osb->displayName, osb]() {
+					std::vector<Button::ContextMenuEntry> entries;
+					if (save)
+					{
+						entries.push_back(Button::ContextMenuEntry{ "DEFAULT_LS_BROWSER_CONTEXT_OPEN"_Ls(), [this, save, name]() {
+							Open(name, save);
+						} });
+					}
+					if (osb->button->Selected())
+					{
+						entries.push_back(Button::ContextMenuEntry{ "DEFAULT_LS_BROWSER_CONTEXT_DESELECT"_Ls(), [this, osb]() {
+							osb->button->Selected(false);
+							UpdateSaveControls();
+						} });
+					}
+					else
+					{
+						entries.push_back(Button::ContextMenuEntry{ "DEFAULT_LS_BROWSER_CONTEXT_SELECT"_Ls(), [this, osb]() {
+							osb->button->Selected(true);
+							UpdateSaveControls();
+						} });
+					}
+					return entries;
+				});
+				osb->button->Click([this, name = osb->displayName, save = osb->save]() {
+					Open(name, save);
+				});
+				if (osb->save)
+				{
+					osb->saveRender = graphics::ThumbnailRendererTask::Create({
+						osb->save,
+						true,
+						true,
+						RENDER_BASC | RENDER_FIRE | RENDER_SPRK | RENDER_EFFE,
+						0,
+						COLOUR_DEFAULT,
+						0,
+						{ 0, 0 },
+						{ { 0, 0 }, osb->saveDataSizeB },
+					});
+					osb->saveRender->Start(osb->saveRender);
+				}
+			}
 			if (osb->saveRender && osb->saveRender->complete)
 			{
 				if (!osb->saveRender->status)

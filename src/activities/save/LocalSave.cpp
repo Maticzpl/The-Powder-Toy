@@ -23,7 +23,7 @@ namespace activities::save
 
 	class WriteSaveTask : public common::WorkerTask
 	{
-		Path path;
+		const Path path;
 		std::shared_ptr<const GameSave> save;
 
 		void Process() final override
@@ -45,7 +45,7 @@ namespace activities::save
 		}
 
 	public:
-		WriteSaveTask(Path newPath, std::shared_ptr<GameSave> newSave) : path(newPath), save(newSave)
+		WriteSaveTask(const Path newPath, std::shared_ptr<const GameSave> newSave) : path(newPath), save(newSave)
 		{
 			progressIndeterminate = true;
 		}
