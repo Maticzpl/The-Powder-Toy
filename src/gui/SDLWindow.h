@@ -309,11 +309,6 @@ namespace gui
 		static String ClipboardText();
 		static bool ClipboardEmpty();
 
-		// int32_t Ticks() const
-		// {
-		// 	return frameStart;
-		// }
-
 		int32_t Ticks() const;
 
 		void Recreate(Configuration newConf);

@@ -125,6 +125,7 @@ namespace gui
 
 	void TextBox::UpdateText()
 	{
+		cursorTick = SDLWindow::Ref().Ticks();
 		UpdateWrapper();
 		UpdateCursor();
 		shouldTriggerChange = true;
@@ -287,7 +288,7 @@ namespace gui
 				}
 			}
 			g.DrawText(textAbs, textToDraw, textColor, Enabled() ? 0 : SDLWindow::drawTextDarken);
-			if (drawCursor && WithFocus() && g.Ticks() % 1000 < 500)
+			if (drawCursor && WithFocus() && (g.Ticks() - cursorTick) % 1000 < 500)
 			{
 				auto cur = textAbs + Point{ wrapperCursor.point.x, wrapperCursor.line * FONT_H };
 				g.DrawLine(cur, cur + Point{ 0, FONT_H - 1 }, e.border);
@@ -466,48 +467,77 @@ namespace gui
 			adjustSelection();
 			return true;
 
-		case SDLK_DELETE:
-			shouldTriggerChange = false;
-			if (selectionSize)
+		case SDLK_INSERT:
+			if (ctrl && !shift)
 			{
-				TextInput("");
-			}
-			else if (editable)
-			{
-				int toRemove = 1;
-				if (ctrl)
+				if (allowCopy && !repeat)
 				{
-					toRemove = WordBorderRight() - cursorPos;
+					Copy();
 				}
-				Remove(cursorPos, toRemove);
+				return true;
 			}
-			UpdateTextOffset(true);
-			TriggerChangeIfNeeded();
+			if (!ctrl && shift)
+			{
+				Paste();
+				return true;
+			}
+			break;
+
+		case SDLK_DELETE:
+			if (shift)
+			{
+				if (allowCopy && !repeat)
+				{
+					Cut();
+				}
+			}
+			else
+			{
+				shouldTriggerChange = false;
+				if (selectionSize)
+				{
+					TextInput("");
+				}
+				else if (editable)
+				{
+					int toRemove = 1;
+					if (ctrl)
+					{
+						toRemove = WordBorderRight() - cursorPos;
+					}
+					Remove(cursorPos, toRemove);
+				}
+				UpdateTextOffset(true);
+				TriggerChangeIfNeeded();
+			}
 			return true;
 
 		case SDLK_BACKSPACE:
-			shouldTriggerChange = false;
-			if (selectionSize)
+			if (!shift)
 			{
-				TextInput("");
-			}
-			else if (editable)
-			{
-				int toRemove = 1;
-				if (ctrl)
+				shouldTriggerChange = false;
+				if (selectionSize)
 				{
-					auto left = WordBorderLeft();
-					toRemove = cursorPos - left;
-					cursorPos = left;
+					TextInput("");
 				}
-				else
+				else if (editable)
 				{
-					cursorPos -= 1;
+					int toRemove = 1;
+					if (ctrl)
+					{
+						auto left = WordBorderLeft();
+						toRemove = cursorPos - left;
+						cursorPos = left;
+					}
+					else
+					{
+						cursorPos -= 1;
+					}
+					Remove(cursorPos, toRemove);
 				}
-				Remove(cursorPos, toRemove);
+				UpdateTextOffset(true);
+				TriggerChangeIfNeeded();
 			}
-			UpdateTextOffset(true);
-			TriggerChangeIfNeeded();
 			return true;
 
 		case SDLK_RETURN:

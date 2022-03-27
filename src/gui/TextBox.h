@@ -58,6 +58,7 @@ namespace gui
 		String textToDraw;
 
 		uint32_t align = Alignment::horizLeft;
+		int32_t cursorTick = 0;
 
 		void UpdateWrapper();
 		void UpdateText();
