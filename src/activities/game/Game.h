@@ -434,7 +434,7 @@ namespace activities::game
 		Path savesPath;
 		Path stampsPath;
 
-		uint32_t decoColor = 0x40FF2000;
+		uint32_t decoColor = 0;
 
 	public:
 		Game();

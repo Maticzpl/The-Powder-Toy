@@ -8,6 +8,7 @@
 #include "gui/SDLWindow.h"
 #include "gui/TrackBar.h"
 #include "gui/Texture.h"
+#include "prefs/GlobalPrefs.h"
 #include "language/Language.h"
 #include "activities/game/Game.h"
 #include "graphics/Pix.h"
@@ -187,12 +188,19 @@ namespace activities::colorpicker
 			ok->Size({ windowSize.x, 17 });
 			ok->Text(String::Build(gui::CommonColorString(gui::commonYellow), "DEFAULT_LS_COLORPICKER_OK"_Ls()));
 			ok->Click([this]() {
-				game::Game::Ref().DecoColor(PixRGBA(
+				auto decoColor = gui::Color{
 					int(roundf(color.r * 255)),
 					int(roundf(color.g * 255)),
 					int(roundf(color.b * 255)),
-					int(roundf(color.a * 255))
-				));
+					int(roundf(color.a * 255)),
+				};
+				game::Game::Ref().DecoColor(PixRGBA(decoColor.r, decoColor.g, decoColor.b, decoColor.a));
+				auto &gpref = prefs::GlobalPrefs::Ref();
+				prefs::Prefs::DeferWrite dw(gpref);
+				gpref.Set("Decoration.Red",   decoColor.r);
+				gpref.Set("Decoration.Green", decoColor.g);
+				gpref.Set("Decoration.Blue",  decoColor.b);
+				gpref.Set("Decoration.Alpha", decoColor.a);
 				Quit();
 			});
 			Okay([ok]() {

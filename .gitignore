@@ -75,6 +75,7 @@ screenshot_*
 # Other IDEs / misc
 .vscode/
 .vs/
+.idea/
 *.sublime-*
 *.project
 *.cproject

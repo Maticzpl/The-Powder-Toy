@@ -287,6 +287,13 @@ namespace activities::game
 		{
 			Favorite(favorite.FromUtf8(), true);
 		}
+
+		DecoColor(PixRGBA(
+			gpref.Get("Decoration.Red",   255),
+			gpref.Get("Decoration.Green",   0),
+			gpref.Get("Decoration.Blue",  255),
+			gpref.Get("Decoration.Alpha", 255)
+		));
 	}
 
 	void Game::InitCommandInterface()
