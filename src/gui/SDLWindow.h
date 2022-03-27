@@ -227,7 +227,7 @@ namespace gui
 		bool eglUnloadWorkaround = false;
 		bool discardTextInput = false;
 
-		String timeFormat = "%c %Z";
+		String timeFormat = "%c";
 
 	public:
 		SDLWindow(Configuration conf);

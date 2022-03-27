@@ -41,14 +41,19 @@ namespace Time
 	{
 		auto ltm = LocalTime(time);
 #if defined(WIN)
-		wchar_t buf[100];
-		wcsftime(buf, sizeof(buf) / sizeof(*buf), Platform::WinWiden(SDLWindow::Ref().TimeFormat().ToUtf8()).c_str(), &ltm);
-		return ByteString(Platform::WinNarrow(buf)).FromUtf8();
+		wchar_t buf[200];
+		if (wcsftime(buf, sizeof(buf) / sizeof(*buf), Platform::WinWiden(SDLWindow::Ref().TimeFormat().ToUtf8()).c_str(), &ltm))
+		{
+			return ByteString(Platform::WinNarrow(buf)).FromUtf8();
+		}
 #else
-		char buf[100];
-		strftime(buf, sizeof(buf) / sizeof(*buf), SDLWindow::Ref().TimeFormat().ToUtf8().c_str(), &ltm);
-		return ByteString(buf).FromUtf8();
+		char buf[200];
+		if (strftime(buf, sizeof(buf) / sizeof(*buf), SDLWindow::Ref().TimeFormat().ToUtf8().c_str(), &ltm))
+		{
+			return ByteString(buf).FromUtf8();
+		}
 #endif
+		return "???";
 	}
 
 	String FormatRelative(time_t time, time_t now)

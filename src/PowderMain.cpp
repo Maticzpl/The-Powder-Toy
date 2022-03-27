@@ -290,11 +290,11 @@ int main(int argc, char *argv[])
 	gui::SDLWindow::Configuration sdlwConf;
 	sdlwConf.size = { WINDOWW, WINDOWH };
 	sdlwConf.scale = gpref.Get("Scale", 1);
-	sdlwConf.fullscreen = gpref.Get("Fullscreen", false);
-	sdlwConf.borderless = gpref.Get("AltFullscreen", false);
-	sdlwConf.resizable = gpref.Get("Resizable", false);
-	sdlwConf.blurry = gpref.Get("Blurry", false);
-	sdlwConf.integer = gpref.Get("ForceIntegerScaling", true);
+	sdlwConf.fullscreen   = gpref.Get("Fullscreen",          false);
+	sdlwConf.borderless   = gpref.Get("AltFullscreen",       false);
+	sdlwConf.resizable    = gpref.Get("Resizable",           false);
+	sdlwConf.blurry       = gpref.Get("Blurry",              false);
+	sdlwConf.integer      = gpref.Get("ForceIntegerScaling",  true);
 	sdlwConf.rendererType = gpref.Get("RendererType", gui::SDLWindow::Configuration::rendererMax, gui::SDLWindow::Configuration::rendererDefault);
 	doScale(arguments, sdlwConf.scale);
 	doKiosk(arguments, sdlwConf.fullscreen);
@@ -319,6 +319,7 @@ int main(int argc, char *argv[])
 		common::Worker worker; // May use any other ExplicitSingleton, should be constructed last.
 		sdlw.MomentumScroll(gpref.Get("MomentumScroll", true));
 		sdlw.FastQuit(gpref.Get("FastQuit", true));
+		sdlw.TimeFormat(gpref.Get("TimeFormat", String("%c")));
 
 #ifdef ENABLE_BLUESCREEN
 		try
