@@ -1,7 +1,9 @@
 #include "Time.h"
 
 #include "SDLWindow.h"
+#include "common/Platform.h"
 
+#include <time.h>
 #include <cstdint>
 
 namespace gui
@@ -37,10 +39,16 @@ namespace Time
 
 	String FormatAbsolute(time_t time)
 	{
-		char buf[100];
 		auto ltm = LocalTime(time);
-		strftime(buf, sizeof(buf), SDLWindow::Ref().TimeFormat().ToUtf8().c_str(), &ltm);
+#if defined(WIN)
+		wchar_t buf[100];
+		wcsftime(buf, sizeof(buf) / sizeof(*buf), Platform::WinWiden(SDLWindow::Ref().TimeFormat().ToUtf8()).c_str(), &ltm);
+		return ByteString(Platform::WinNarrow(buf)).FromUtf8();
+#else
+		char buf[100];
+		strftime(buf, sizeof(buf) / sizeof(*buf), SDLWindow::Ref().TimeFormat().ToUtf8().c_str(), &ltm);
 		return ByteString(buf).FromUtf8();
+#endif
 	}
 
 	String FormatRelative(time_t time, time_t now)

@@ -1182,14 +1182,14 @@ const std::vector<uint32_t> &SimulationRenderer::HeatTable()
 const std::vector<uint32_t> &SimulationRenderer::ClfmTable()
 {
 	static std::vector<uint32_t> table = gradient({
-		{ 0x000000, 0.00 },
-		{ 0x0A0917, 0.10 },
-		{ 0x19163C, 0.20 },
-		{ 0x28285E, 0.30 },
-		{ 0x343E77, 0.40 },
-		{ 0x49769A, 0.60 },
-		{ 0x57A0B4, 0.80 },
-		{ 0x5EC4C6, 1.00 },
+		{ 0x000000, 0.00f },
+		{ 0x0A0917, 0.10f },
+		{ 0x19163C, 0.20f },
+		{ 0x28285E, 0.30f },
+		{ 0x343E77, 0.40f },
+		{ 0x49769A, 0.60f },
+		{ 0x57A0B4, 0.80f },
+		{ 0x5EC4C6, 1.00f },
 	}, 200);
 	return table;
 }
@@ -1197,12 +1197,12 @@ const std::vector<uint32_t> &SimulationRenderer::ClfmTable()
 const std::vector<uint32_t> &SimulationRenderer::FirwTable()
 {
 	static std::vector<uint32_t> table = gradient({
-		{ 0xFF00FF, 0.00 },
-		{ 0x0000FF, 0.20 },
-		{ 0x00FFFF, 0.40 },
-		{ 0x00FF00, 0.60 },
-		{ 0xFFFF00, 0.80 },
-		{ 0xFF0000, 1.00 },
+		{ 0xFF00FF, 0.00f },
+		{ 0x0000FF, 0.20f },
+		{ 0x00FFFF, 0.40f },
+		{ 0x00FF00, 0.60f },
+		{ 0xFFFF00, 0.80f },
+		{ 0xFF0000, 1.00f },
 	}, 200);
 	return table;
 }
