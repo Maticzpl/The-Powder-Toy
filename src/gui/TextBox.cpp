@@ -354,8 +354,8 @@ namespace gui
 	bool TextBox::KeyPress(int sym, int scan, bool repeat, bool shift, bool ctrl, bool alt)
 	{
 		auto prevCursorPos = cursorPos;
-		auto adjustSelection = [this, prevCursorPos]() {
-			if (SDLWindow::Ref().ModShift())
+		auto adjustSelection = [this, prevCursorPos, shift]() {
+			if (shift)
 			{
 				UpdateCursor();
 				if (!selectionSize)
@@ -373,10 +373,15 @@ namespace gui
 			UpdateTextOffset(true);
 		};
 
+		if (alt)
+		{
+			return false;
+		}
+
 		switch (sym)
 		{
 		case SDLK_UP:
-			if (SDLWindow::Ref().ModCtrl())
+			if (ctrl)
 			{
 				// * TODO-REDO_UI: maybe scrolling?
 			}
@@ -402,7 +407,7 @@ namespace gui
 			return false;
 
 		case SDLK_DOWN:
-			if (SDLWindow::Ref().ModCtrl())
+			if (ctrl)
 			{
 				// * TODO-REDO_UI: maybe scrolling?
 			}
@@ -428,7 +433,7 @@ namespace gui
 			return false;
 
 		case SDLK_LEFT:
-			if (SDLWindow::Ref().ModCtrl())
+			if (ctrl)
 			{
 				cursorPos = WordBorderLeft();
 			}
@@ -440,7 +445,7 @@ namespace gui
 			return true;
 
 		case SDLK_RIGHT:
-			if (SDLWindow::Ref().ModCtrl())
+			if (ctrl)
 			{
 				cursorPos = WordBorderRight();
 			}
@@ -470,7 +475,7 @@ namespace gui
 			else if (editable)
 			{
 				int toRemove = 1;
-				if (SDLWindow::Ref().ModCtrl())
+				if (ctrl)
 				{
 					toRemove = WordBorderRight() - cursorPos;
 				}
@@ -489,7 +494,7 @@ namespace gui
 			else if (editable)
 			{
 				int toRemove = 1;
-				if (SDLWindow::Ref().ModCtrl())
+				if (ctrl)
 				{
 					auto left = WordBorderLeft();
 					toRemove = cursorPos - left;
@@ -514,7 +519,7 @@ namespace gui
 			return false;
 
 		case SDLK_a:
-			if (SDLWindow::Ref().ModCtrl())
+			if (ctrl)
 			{
 				if (!repeat)
 				{
@@ -525,7 +530,7 @@ namespace gui
 			break;
 
 		case SDLK_c:
-			if (SDLWindow::Ref().ModCtrl())
+			if (ctrl)
 			{
 				if (allowCopy && !repeat)
 				{
@@ -536,7 +541,7 @@ namespace gui
 			break;
 
 		case SDLK_v:
-			if (SDLWindow::Ref().ModCtrl())
+			if (ctrl)
 			{
 				Paste();
 				return true;
@@ -544,7 +549,7 @@ namespace gui
 			break;
 
 		case SDLK_x:
-			if (SDLWindow::Ref().ModCtrl())
+			if (ctrl)
 			{
 				if (allowCopy && !repeat)
 				{
