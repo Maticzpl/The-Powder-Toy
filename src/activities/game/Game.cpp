@@ -1842,7 +1842,7 @@ namespace activities::game
 			if (action->end)
 			{
 				// * TODO-REDO_UI: Prevent adding and removing actions during this callback.
-				action->end();
+				action->end(false);
 			}
 		}
 		return endedSomething;
@@ -1856,15 +1856,13 @@ namespace activities::game
 			return false;
 		}
 		EndAllActions();
-		std::vector<ActionContext *> path;
+		std::deque<ActionContext *> path;
 		auto *up = context;
 		while (up)
 		{
-			// * TODO-REDO_UI: Eww.
-			path.push_back(up);
+			path.push_front(up);
 			up = up->parent;
 		}
-		std::reverse(path.begin(), path.end());
 		auto startFrom = 0U;
 		for (auto i = 0U; i < activeContexts.size(); ++i)
 		{
@@ -1964,7 +1962,7 @@ namespace activities::game
 			if (keyToActionPtr.second->end)
 			{
 				// * TODO-REDO_UI: Prevent adding and removing actions during this callback.
-				keyToActionPtr.second->end();
+				keyToActionPtr.second->end(true);
 			}
 		}
 	}
@@ -2118,7 +2116,8 @@ namespace activities::game
 			String name;
 			uint32_t dof; // * Degrees of freedom.
 			int precedence;
-			std::function<void ()> begin, end;
+			std::function<void ()> begin;
+			std::function<void (bool)> end;
 		};
 		struct DefaultContext
 		{
@@ -2164,16 +2163,17 @@ namespace activities::game
 			{ "COPY"               ,        0,    0, [this]() { SelectStart(selectModeCopy);      },                      nullptr },
 			{ "CUT"                ,        0,    0, [this]() { SelectStart(selectModeCut);       },                      nullptr },
 			{ "STAMP"              ,        0,    0, [this]() { SelectStart(selectModeStamp);     },                      nullptr },
-			{ "LASTSTAMP"          ,        0,    0, [this]() { PasteFromLastStamp();             },                      nullptr },
+			{ "LOADPREVSTAMP"      ,        0,    0, [this]() { PasteFromPrevStamp();             },                      nullptr },
+			{ "LOADNEXTSTAMP"      ,        0,    0, [this]() { PasteFromNextStamp();             },                      nullptr },
 			{ "PASTE"              ,        0,    0, [this]() { PasteFromClipboard();             },                      nullptr },
-			{ "SELECTFINISH"       ,        0,    0, [this]() { SelectSetOrigin();                }, [this]() { SelectFinish(); } },
-			{ "SELECTCANCEL"       ,        0,    0,                                        nullptr, [this]() { SelectCancel(); } },
-			{ "PASTEFINISH"        ,        0,    0,                                        nullptr, [this]() { PasteFinish();  } },
-			{ "PASTECANCEL"        ,        0,    0,                                        nullptr, [this]() { PasteCancel();  } },
-			{ "PASTERIGHT"         ,        0,    0, [this]() { PasteNudge({  1,  0 }); },                      nullptr },
-			{ "PASTELEFT"          ,        0,    0, [this]() { PasteNudge({ -1,  0 }); },                      nullptr },
-			{ "PASTEUP"            ,        0,    0, [this]() { PasteNudge({  0, -1 }); },                      nullptr },
-			{ "PASTEDOWN"          ,        0,    0, [this]() { PasteNudge({  0,  1 }); },                      nullptr },
+			{ "SELECTFINISH"       ,        0,    0, [this]() { SelectSetOrigin();                }, [this](bool cancel) { SelectFinish(cancel); } },
+			{ "SELECTCANCEL"       ,        0,    0,                                        nullptr, [this](bool)        { SelectCancel();       } },
+			{ "PASTEFINISH"        ,        0,    0,                                        nullptr, [this](bool cancel) { PasteFinish (cancel); } },
+			{ "PASTECANCEL"        ,        0,    0,                                        nullptr, [this](bool)        { PasteCancel ();       } },
+			{ "PASTERIGHT"         ,        0,    0, [this]() { PasteNudge({  1,  0 });           },                      nullptr },
+			{ "PASTELEFT"          ,        0,    0, [this]() { PasteNudge({ -1,  0 });           },                      nullptr },
+			{ "PASTEUP"            ,        0,    0, [this]() { PasteNudge({  0, -1 });           },                      nullptr },
+			{ "PASTEDOWN"          ,        0,    0, [this]() { PasteNudge({  0,  1 });           },                      nullptr },
 			{ "PASTEROTATE"        ,        0,    0, [this]() { PasteRotate();                    },                      nullptr },
 			{ "PASTEHFLIP"         ,        0,    0, [this]() { PasteHorizontalFlip();            },                      nullptr },
 			{ "PASTEVFLIP"         ,        0,    0, [this]() { PasteVerticalFlip();              },                      nullptr },
@@ -2181,9 +2181,9 @@ namespace activities::game
 			{ "REDO"               ,        0,    0, [this]() { HistoryRedo();                    },                      nullptr },
 			{ "BRUSHZOOMSIZEUP"    , brushDof, 1200, [this]() { AdjustBrushOrZoomSize( 1);        },                      nullptr },
 			{ "BRUSHZOOMSIZEDOWN"  , brushDof, 1201, [this]() { AdjustBrushOrZoomSize(-1);        },                      nullptr },
-			{ "TOOL0"              ,  toolDof, 1100, [this]() { ToolStart(0);                     },  [this]() { ToolFinish(0); } },
-			{ "TOOL1"              ,  toolDof, 1101, [this]() { ToolStart(1);                     },  [this]() { ToolFinish(1); } },
-			{ "TOOL2"              ,  toolDof, 1102, [this]() { ToolStart(2);                     },  [this]() { ToolFinish(2); } },
+			{ "TOOL0"              ,  toolDof, 1100, [this]() { ToolStart(0);                     },  [this](bool) { ToolFinish(0); } },
+			{ "TOOL1"              ,  toolDof, 1101, [this]() { ToolStart(1);                     },  [this](bool) { ToolFinish(1); } },
+			{ "TOOL2"              ,  toolDof, 1102, [this]() { ToolStart(2);                     },  [this](bool) { ToolFinish(2); } },
 			{ "RELOADSIM"          ,        0,    0, [this]() { ReloadSimulation();               },                      nullptr },
 			{ "TOGGLEINTRO"        ,        0,    0, [this]() { ToggleIntroText();                },                      nullptr },
 			{ "PROPTOOL"           ,  propDof,    0,                                        nullptr,                      nullptr }, // * TODO-REDO_UI
@@ -2234,7 +2234,8 @@ namespace activities::game
 			{ "CUT"              , "ROOT"  ,   SCAN1 (SDL_SCANCODE_X           ) },
 			{ "STAMP"            , "ROOT"  ,   SCAN  (SDL_SCANCODE_S           ) }, // * TODO-REDO_UI: stickmen?
 			{ "PASTE"            , "ROOT"  ,   SCAN1 (SDL_SCANCODE_V           ) },
-			{ "LASTSTAMP"        , "ROOT"  ,   SCAN  (SDL_SCANCODE_L           ) },
+			{ "LOADPREVSTAMP"    , "ROOT"  ,   SCAN  (SDL_SCANCODE_L           ) },
+			{ "LOADNEXTSTAMP"    , "ROOT"  ,   SCAN0 (SDL_SCANCODE_L           ) },
 			{ "OPENSTAMPS"       , "ROOT"  ,   SCAN  (SDL_SCANCODE_K           ) },
 			{ "INVERTPRESSURE"   , "ROOT"  ,   SCAN  (SDL_SCANCODE_I           ) },
 			{ "INSTALL"          , "ROOT"  ,   SCAN1 (SDL_SCANCODE_I           ) },
@@ -2409,19 +2410,51 @@ namespace activities::game
 
 		contextSelect = contexts.at("DEFAULT_CX_SELECT").get();
 		contextSelect->canEnter = [this]() {
-			return selectMode != selectModeMax;
+			return nextSelectMode != selectModeMax;
+		};
+		contextSelect->enter = [this]() {
+			selectMode = nextSelectMode;
+			nextSelectMode = selectModeMax;
+			selectOriginValid = false;
+			switch (selectMode)
+			{
+			case selectModeCopy:
+				ActivateActionTip("DEFAULT_LS_GAME_COPYHELP"_Ls());
+				break;
+
+			case selectModeCut:
+				ActivateActionTip("DEFAULT_LS_GAME_CUTHELP"_Ls());
+				break;
+
+			case selectModeStamp:
+				ActivateActionTip("DEFAULT_LS_GAME_STAMPHELP"_Ls());
+				break;
+
+			default:
+				break;
+			}
 		};
 		contextSelect->leave = [this]() {
 			selectMode = selectModeMax;
+			DeectivateActionTip();
 		};
+
 		contextPaste = contexts.at("DEFAULT_CX_PASTE").get();
 		contextPaste->canEnter = [this]() {
-			return bool(pasteSource);
+			return bool(nextPasteSource);
+		};
+		contextPaste->enter = [this]() {
+			pasteSource = nextPasteSource;
+			nextPasteSource.reset();
+			pasteRotflip = 0U;
+			PasteCenter();
+			ActivateActionTip("DEFAULT_LS_GAME_PASTEHELP"_Ls());
 		};
 		contextPaste->leave = [this]() {
 			pasteRender.reset();
 			pasteTexture->ImageData(gui::Image());
 			pasteSource.reset();
+			DeectivateActionTip();
 		};
 	}
 
@@ -2670,27 +2703,14 @@ namespace activities::game
 		actionTipAnim.Start(2, true);
 	}
 
+	void Game::DeectivateActionTip()
+	{
+		actionTipAnim.Start(0, false);
+	}
+
 	void Game::SelectStart(SelectMode newSelectMode)
 	{
-		selectMode = newSelectMode;
-		selectOriginValid = false;
-		switch (selectMode)
-		{
-		case selectModeCopy:
-			ActivateActionTip("DEFAULT_LS_GAME_COPYHELP"_Ls());
-			break;
-
-		case selectModeCut:
-			ActivateActionTip("DEFAULT_LS_GAME_CUTHELP"_Ls());
-			break;
-
-		case selectModeStamp:
-			ActivateActionTip("DEFAULT_LS_GAME_STAMPHELP"_Ls());
-			break;
-
-		default:
-			break;
-		}
+		nextSelectMode = newSelectMode;
 		EnterContext(contextSelect);
 	}
 
@@ -2700,8 +2720,13 @@ namespace activities::game
 		selectOriginValid = true;
 	}
 
-	void Game::SelectFinish()
+	void Game::SelectFinish(bool cancel)
 	{
+		if (cancel)
+		{
+			SelectCancel();
+			return;
+		}
 		auto &g = gui::SDLWindow::Ref();
 		auto mod0 = bool(g.Mod() & gui::SDLWindow::mod0);
 		auto rect = gui::Rect::FromCorners(selectOrigin, simulationRect.Clamp(g.MousePosition()));
@@ -2716,7 +2741,9 @@ namespace activities::game
 		// * TODO-REDO_UI: Have Simulation::Save return an std::shared_ptr.
 		auto selected = std::shared_ptr<GameSave>(simulation->Save(includePressure != mod0, atl.x, atl.y, abr.x, abr.y));
 		selected->paused = paused;
-		switch (selectMode)
+		auto prevSelectMode = selectMode;
+		LeaveContext(contextSelect);
+		switch (prevSelectMode)
 		{
 		case selectModeCopy:
 		case selectModeCut:
@@ -2730,7 +2757,7 @@ namespace activities::game
 				// Client::Ref().SaveAuthorInfo(&clipboardInfo); // * TODO-REDO_UI
 				selected->authors = clipboardInfo;
 				clipboard = selected;
-				if (selectMode == selectModeCut)
+				if (prevSelectMode == selectModeCut)
 				{
 					HistorySnapshot();
 					simulation->clear_area(rect.TopLeft().x, rect.TopLeft().y, rect.size.x, rect.size.y);
@@ -2761,13 +2788,12 @@ namespace activities::game
 		default:
 			break;
 		}
-		LeaveContext(contextSelect);
 	}
 
 	void Game::SelectCancel()
 	{
-		ActivateActionTip("DEFAULT_LS_GAME_SELECTCANCEL"_Ls());
 		LeaveContext(contextSelect);
+		ActivateActionTip("DEFAULT_LS_GAME_SELECTCANCEL"_Ls());
 	}
 
 	void Game::PasteDispatchRender()
@@ -2794,7 +2820,11 @@ namespace activities::game
 		pasteSize = sizeB * CELL;
 	}
 
-	void Game::PasteFromLastStamp()
+	void Game::PasteFromPrevStamp()
+	{
+	}
+
+	void Game::PasteFromNextStamp()
 	{
 		// auto stamps = Client::Ref().GetStamps(0, 1);
 		// if (stamps.size())
@@ -2847,23 +2877,26 @@ namespace activities::game
 
 	void Game::PasteStart(std::shared_ptr<GameSave> newPasteSource)
 	{
-		pasteSource = newPasteSource;
-		pasteRotflip = 0U;
-		PasteCenter();
-		ActivateActionTip("DEFAULT_LS_GAME_PASTEHELP"_Ls());
+		nextPasteSource = newPasteSource;
 		EnterContext(contextPaste);
 	}
 
 	gui::Point Game::PastePos() const
 	{
 		auto dest = gui::SDLWindow::Ref().MousePosition() + pasteOffset;
-		dest.x = (dest.x + CELL / 2) / CELL * CELL;
-		dest.y = (dest.y + CELL / 2) / CELL * CELL;
-		return dest;
+		return {
+			(dest.x + CELL / 2) / CELL * CELL,
+			(dest.y + CELL / 2) / CELL * CELL,
+		};
 	}
 
-	void Game::PasteFinish()
+	void Game::PasteFinish(bool cancel)
 	{
+		if (cancel)
+		{
+			PasteCancel();
+			return;
+		}
 		auto mod0 = bool(gui::SDLWindow::Ref().Mod() & gui::SDLWindow::mod0);
 		HistorySnapshot();
 		auto pasteRect = PasteDestination();
@@ -2873,17 +2906,17 @@ namespace activities::game
 		auto failed = bool(simulation->Load(save.get(), !mod0, pasteRect.pos.x, pasteRect.pos.y));
 		if (!failed)
 		{
-			Paused(save->paused | paused);
+			Paused(save->paused || paused);
 			// Client::Ref().MergeStampAuthorInfo(save->authors); // * TODO-REDO_UI
 		}
-		ActivateActionTip("DEFAULT_LS_GAME_PASTEDONE"_Ls());
 		LeaveContext(contextPaste);
+		ActivateActionTip("DEFAULT_LS_GAME_PASTEDONE"_Ls());
 	}
 
 	void Game::PasteCancel()
 	{
-		ActivateActionTip("DEFAULT_LS_GAME_PASTECANCEL"_Ls());
 		LeaveContext(contextPaste);
+		ActivateActionTip("DEFAULT_LS_GAME_PASTECANCEL"_Ls());
 	}
 
 	void Game::PasteNudge(gui::Point nudge)

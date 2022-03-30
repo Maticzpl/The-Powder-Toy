@@ -122,7 +122,8 @@ namespace activities::game
 		String name, description;
 		uint32_t dof; // * Degrees of freedom.
 		int precedence;
-		std::function<void ()> begin, end;
+		std::function<void ()> begin;
+		std::function<void (bool)> end;
 	};
 
 	struct ActionContext
@@ -317,6 +318,7 @@ namespace activities::game
 		std::set<String> favorites;
 
 		void ActivateActionTip(const String &text);
+		void DeectivateActionTip();
 		void DrawActionTip() const;
 		String actionTipText;
 		gui::LinearDelayAnimation actionTipAnim;
@@ -333,11 +335,12 @@ namespace activities::game
 		IntroTextState introTextState = introTextInitial;
 		gui::LinearDelayAnimation introTextAnim;
 
+		SelectMode nextSelectMode = selectModeMax;
 		SelectMode selectMode = selectModeMax;
 		ActionContext *contextSelect = nullptr;
 		void SelectStart(SelectMode newSelectMode);
 		void SelectSetOrigin();
-		void SelectFinish();
+		void SelectFinish(bool cancel);
 		void SelectCancel();
 		gui::Point selectOrigin;
 		bool selectOriginValid = false;
@@ -351,15 +354,17 @@ namespace activities::game
 		gui::Point pasteSize;
 		gui::Texture *pasteTexture = nullptr;
 		std::shared_ptr<graphics::ThumbnailRendererTask> pasteRender;
+		std::shared_ptr<GameSave> nextPasteSource;
 		std::shared_ptr<GameSave> pasteSource;
 		std::shared_ptr<GameSave> reloadSource;
 		backend::SaveInfo reloadSourceInfo = {};
 		void PasteDispatchRender();
 		void PasteGetThumbnail();
-		void PasteFromLastStamp();
+		void PasteFromPrevStamp();
+		void PasteFromNextStamp();
 		void PasteFromClipboard();
 		void PasteStart(std::shared_ptr<GameSave> newPasteSource);
-		void PasteFinish();
+		void PasteFinish(bool cancel);
 		void PasteCancel();
 		void PasteNudge(gui::Point nudge);
 		void PasteCenter();
