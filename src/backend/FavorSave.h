@@ -7,7 +7,7 @@ namespace backend
 {
 	class FavorSave : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		FavorSave(String id, bool favor);

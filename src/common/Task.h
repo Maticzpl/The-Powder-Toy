@@ -14,10 +14,20 @@ namespace common
 	//   interface. I'm not sure, I may yet migrate to std::promise.
 	struct Task
 	{
+		struct Status
+		{
+			bool ok = false;
+			String shortError;
+			String error;
+
+			operator bool() const
+			{
+				return ok;
+			}
+		};
+
 		std::atomic<bool> complete = false;
-		bool status = false;
-		String error;
-		String shortError;
+		Status status;
 
 		float relativeWeight = 1.f;
 		std::atomic<float> progress = 0.f;

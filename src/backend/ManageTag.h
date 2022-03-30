@@ -9,7 +9,7 @@ namespace backend
 {
 	class ManageTag : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		std::set<String> tags;

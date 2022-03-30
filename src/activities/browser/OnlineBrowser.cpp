@@ -362,7 +362,7 @@ namespace activities::browser
 		else
 		{
 			errorStatic->Visible(true);
-			errorStatic->Text(String::Build("DEFAULT_LS_ONLINEBROWSER_SAVELIST_ERROR"_Ls(), searchSaves->error));
+			errorStatic->Text(String::Build("DEFAULT_LS_ONLINEBROWSER_SAVELIST_ERROR"_Ls(), searchSaves->status.error));
 			pagination->PageMax(0);
 		}
 		searchSaves.reset();
@@ -410,12 +410,12 @@ namespace activities::browser
 			String error;
 			if (!getSaveInfo->status)
 			{
-				error = getSaveInfo->error;
+				error = getSaveInfo->status.error;
 				errorValid = true;
 			}
 			else if (!getSaveData->status)
 			{
-				error = getSaveData->error;
+				error = getSaveData->status.error;
 				errorValid = true;
 			}
 			else
@@ -479,7 +479,7 @@ namespace activities::browser
 		else
 		{
 			tagErrorStatic->Visible(true);
-			tagErrorStatic->Text(String::Build("DEFAULT_LS_ONLINEBROWSER_TAGLIST_ERROR"_Ls(), searchTags->error));
+			tagErrorStatic->Text(String::Build("DEFAULT_LS_ONLINEBROWSER_TAGLIST_ERROR"_Ls(), searchTags->status.error));
 		}
 		searchTags.reset();
 	}
@@ -505,7 +505,7 @@ namespace activities::browser
 				}
 				else
 				{
-					osb->button->Text(String::Build(gui::CommonColorString(gui::commonYellow), osb->getThumbnail->shortError));
+					osb->button->Text(String::Build(gui::CommonColorString(gui::commonYellow), osb->getThumbnail->status.shortError));
 				}
 				osb->getThumbnail.reset();
 			}

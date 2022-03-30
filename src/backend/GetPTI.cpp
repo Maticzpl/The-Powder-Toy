@@ -11,11 +11,12 @@ namespace backend
 		request->uri = (STATICSCHEME STATICSERVER + path).ToUtf8();
 	}
 
-	bool GetPTI::Process()
+	common::Task::Status GetPTI::Process()
 	{
-		if (!PreprocessResponse(responseCheckBasic))
+		auto prep = PreprocessResponse(responseCheckBasic);
+		if (!prep)
 		{
-			return false;
+			return prep;
 		}
 		try
 		{
@@ -23,10 +24,8 @@ namespace backend
 		}
 		catch (const std::exception &e)
 		{
-			error = "Could not read response: " + ByteString(e.what()).FromUtf8();
-			shortError = "invalid PTI";
-			return false;
+			return { false, "invalid PTI", "Could not read response: " + ByteString(e.what()).FromUtf8() };
 		}
-		return true;
+		return { true };
 	}
 }

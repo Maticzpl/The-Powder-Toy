@@ -20,11 +20,12 @@ namespace backend
 		Backend::Ref().AddAuthHeaders(*request);
 	}
 
-	bool GetSaveInfo::Process()
+	common::Task::Status GetSaveInfo::Process()
 	{
-		if (!PreprocessResponse(responseCheckJson))
+		auto prep = PreprocessResponse(responseCheckJson);
+		if (!prep)
 		{
-			return false;
+			return prep;
 		}
 		try
 		{
@@ -54,10 +55,8 @@ namespace backend
 		}
 		catch (const std::exception &e) // * TODO-REDO_UI: Stupid, should be an exception specific to our json lib.
 		{
-			error = "Could not read response: " + ByteString(e.what()).FromUtf8();
-			shortError = "invalid JSON";
-			return false;
+			return { false, "invalid JSON", "Could not read response: " + ByteString(e.what()).FromUtf8() };
 		}
-		return true;
+		return { true };
 	}
 }

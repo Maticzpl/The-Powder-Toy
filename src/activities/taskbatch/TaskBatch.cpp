@@ -58,7 +58,7 @@ namespace activities::taskbatch
 		{
 			if (!currentTask->task->status)
 			{
-				std::cerr << currentTask->errorPrefix.ToUtf8() << currentTask->task->error.ToUtf8() << std::endl;
+				std::cerr << currentTask->errorPrefix.ToUtf8() << currentTask->task->status.error.ToUtf8() << std::endl;
 			}
 			completedWeight += currentTask->task->relativeWeight;
 			currentTask = nullptr;

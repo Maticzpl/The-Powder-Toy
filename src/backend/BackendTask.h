@@ -17,7 +17,7 @@ namespace backend
 
 	class BackendTask : public common::Task
 	{
-		virtual bool Process() = 0;
+		virtual common::Task::Status Process() = 0;
 
 	protected:
 		std::shared_ptr<network::Request> request;
@@ -29,7 +29,7 @@ namespace backend
 			responseCheckBasic, // * Response body is the requested data, status code and other nonsense determines whether the request succeeded.
 			responseCheckMax,   // * Must be the last enum constant.
 		};
-		bool PreprocessResponse(ResponseCheckMode responseCheckMode);
+		common::Task::Status PreprocessResponse(ResponseCheckMode responseCheckMode);
 
 		Json::Value root;
 

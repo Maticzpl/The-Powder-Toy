@@ -19,18 +19,18 @@ namespace backend
 		backend::Backend::Ref().Dispatch(std::static_pointer_cast<BackendTask>(self));
 	}
 
-	bool BackendTask::PreprocessResponse(ResponseCheckMode responseCheckMode)
+	common::Task::Status BackendTask::PreprocessResponse(ResponseCheckMode responseCheckMode)
 	{
 		if (request->responseCode == 200 && !request->responseBody.size())
 		{
 			// * No server response, malformed response.
-			// * TODO-REDO_UI: What???
+			// * TODO-REDO_UI: Ask jacob about this.
 			request->responseCode = 603;
 		}
 		if (request->responseCode == 302)
 		{
-			// * TODO-REDO_UI: What???
-			return true;
+			// * TODO-REDO_UI: Ask jacob about this.
+			return { true };
 		}
 		if (request->responseCode == 200)
 		{
@@ -44,14 +44,12 @@ namespace backend
 					// * Everything is fine if an array is returned.
 					if (root.type() == Json::arrayValue)
 					{
-						return true;
+						return { true };
 					}
 					int status = root.get("Status", 1).asInt();
 					if (status != 1)
 					{
-						error = ByteString(root.get("Error", "Unspecified Error").asString()).FromUtf8();
-						shortError = "failed";
-						return false;
+						return { false, "failed", ByteString(root.get("Error", "Unspecified Error").asString()).FromUtf8() };
 					}
 				}
 				catch (const std::exception &e)
@@ -59,22 +57,16 @@ namespace backend
 					// * Sometimes the server returns a 200 with the text "Error: 401" or similar.
 					if (!memcmp(&request->responseBody[0], "Error: ", 7))
 					{
-						error = "Could not read response: " + ByteString(e.what()).FromUtf8();
-						shortError = "invalid JSON";
-						return false;
+						return { false, "invalid JSON", "Could not read response: " + ByteString(e.what()).FromUtf8() };
 					}
 					request->responseCode = ByteString(request->responseBody.begin() + 7, request->responseBody.end()).ToNumber<int>(true);
-					error = String::Build("HTTP Error ", request->responseCode, ": ", StatusText(request->responseCode));
-					shortError = String::Build("HTTP ", request->responseCode);
 				}
 				break;
 
 			case responseCheckOk:
 				if (request->responseBody.Substr(0, 2) != ByteString("OK"))
 				{
-					error = request->responseBody.FromUtf8();
-					shortError = "failed";
-					return false;
+					return { false, "failed", request->responseBody.FromUtf8() };
 				}
 				break;
 
@@ -84,11 +76,9 @@ namespace backend
 		}
 		if (request->responseCode != 200)
 		{
-			error = String::Build("HTTP Error ", request->responseCode, ": ", StatusText(request->responseCode));
-			shortError = String::Build("HTTP ", request->responseCode);
-			return false;
+			return { false, String::Build("HTTP ", request->responseCode), String::Build("HTTP Error ", request->responseCode, ": ", StatusText(request->responseCode)) };
 		}
-		return true;
+		return { true };
 	}
 
 	static String StatusText(int ret)

@@ -16,19 +16,18 @@ namespace backend
 		b.AddAuthHeaders(*request);
 	}
 
-	bool PutSave::Process()
+	common::Task::Status PutSave::Process()
 	{
-		if (!PreprocessResponse(responseCheckOk))
+		auto prep = PreprocessResponse(responseCheckOk);
+		if (!prep)
 		{
-			return false;
+			return prep;
 		}
 		if (request->responseBody.Substr(0, 3) != "OK ")
 		{
-			error = "Server did not return an ID";
-			shortError = "invalid ID";
-			return false;
+			return { false, "invalid ID", "Server did not return an ID" };
 		}
 		id = request->responseBody.Substr(3).FromUtf8();
-		return true;
+		return { true };
 	}
 }

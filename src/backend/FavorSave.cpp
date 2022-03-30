@@ -21,7 +21,7 @@ namespace backend
 		b.AddAuthHeaders(*request);
 	}
 
-	bool FavorSave::Process()
+	common::Task::Status FavorSave::Process()
 	{
 		return PreprocessResponse(responseCheckJson);
 	}

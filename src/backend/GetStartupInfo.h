@@ -7,7 +7,7 @@ namespace backend
 {
 	class GetStartupInfo : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		String motd;

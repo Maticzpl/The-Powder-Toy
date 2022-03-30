@@ -30,7 +30,7 @@ namespace common
 				auto ptr = wptr.lock();
 				if (ptr)
 				{
-					ptr->Process();
+					ptr->status = ptr->Process();
 					ptr->complete = true;
 				}
 				else

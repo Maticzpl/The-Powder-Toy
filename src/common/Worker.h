@@ -17,7 +17,7 @@ namespace common
 	{
 		virtual ~WorkerTask() = default;
 
-		virtual void Process() = 0;
+		virtual Status Process() = 0;
 
 		void Start(std::shared_ptr<common::Task> self) final override;
 	};

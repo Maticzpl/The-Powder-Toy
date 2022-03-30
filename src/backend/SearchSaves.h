@@ -12,7 +12,7 @@ namespace backend
 {
 	class SearchSaves : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		int saveCount;

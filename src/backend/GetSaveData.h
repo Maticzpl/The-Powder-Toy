@@ -10,7 +10,7 @@ namespace backend
 {
 	class GetSaveData : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		std::vector<unsigned char> data;

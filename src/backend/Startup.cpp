@@ -75,7 +75,7 @@ namespace backend
 				{
 					if (setError)
 					{
-						error = req->error;
+						error = req->status.error;
 					}
 				}
 				if (setStatus)

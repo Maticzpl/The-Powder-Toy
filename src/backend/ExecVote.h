@@ -8,7 +8,7 @@ namespace backend
 {
 	class ExecVote : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		ExecVote(SaveIDV idv, int direction);

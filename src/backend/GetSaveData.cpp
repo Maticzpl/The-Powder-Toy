@@ -20,19 +20,18 @@ namespace backend
 		}
 	}
 
-	bool GetSaveData::Process()
+	common::Task::Status GetSaveData::Process()
 	{
-		if (!PreprocessResponse(responseCheckBasic))
+		auto prep = PreprocessResponse(responseCheckBasic);
+		if (!prep)
 		{
-			return false;
+			return prep;
 		}
 		if (!request->responseBody.size())
 		{
-			error = "Save data empty";
-			shortError = "no data";
-			return false;
+			return { false, "no data", "Save data empty" };
 		}
 		data.assign(request->responseBody.begin(), request->responseBody.end());
-		return true;
+		return { true };
 	}
 }

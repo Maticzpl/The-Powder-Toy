@@ -7,7 +7,7 @@ namespace backend
 {
 	class DeleteSave : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		DeleteSave(String id, bool unpublishOnly);

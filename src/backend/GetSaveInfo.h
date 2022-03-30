@@ -8,7 +8,7 @@ namespace backend
 {
 	class GetSaveInfo : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		SaveInfo info;

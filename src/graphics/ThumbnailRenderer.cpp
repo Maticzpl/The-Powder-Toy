@@ -21,7 +21,7 @@ namespace graphics
 	{
 	}
 
-	void ThumbnailRenderer::Process(ThumbnailRendererTask &task)
+	common::Task::Status ThumbnailRenderer::Process(ThumbnailRendererTask &task)
 	{
 		auto &conf = task.conf;
 		auto &output = task.output;
@@ -43,7 +43,6 @@ namespace graphics
 		auto chunkBW = (XRES / CELL) - 2 * seamB;
 		auto chunkBH = (YRES / CELL) - 2 * seamB;
 		output = gui::Image::FromSize({ pasteRectB.size.x * CELL, pasteRectB.size.y * CELL });
-		task.status = false;
 		for (auto y = 0; y < pasteRectB.size.y; y += chunkBH)
 		{
 			for (auto x = 0; x < pasteRectB.size.x; x += chunkBW)
@@ -58,7 +57,8 @@ namespace graphics
 					auto failed = bool(simulation->Load(save.get(), true));
 					if (failed)
 					{
-						return;
+						// * TODO-REDO_UI: Do something with this.
+						return { false, "failed to load save", "" };
 					}
 				}
 				simulationRenderer->ClearAccumulation();
@@ -83,7 +83,7 @@ namespace graphics
 				}
 			}
 		}
-		task.status = true;
+		return { true };
 	}
 
 	std::shared_ptr<ThumbnailRendererTask> ThumbnailRendererTask::Create(Configuration conf)
@@ -93,8 +93,8 @@ namespace graphics
 		return task;
 	}
 
-	void ThumbnailRendererTask::Process()
+	common::Task::Status ThumbnailRendererTask::Process()
 	{
-		ThumbnailRenderer::Ref().Process(*this);
+		return ThumbnailRenderer::Ref().Process(*this);
 	}
 }

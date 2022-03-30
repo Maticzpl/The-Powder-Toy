@@ -34,7 +34,7 @@ namespace graphics
 		};
 		Configuration conf;
 
-		void Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		gui::Image output;
@@ -53,6 +53,6 @@ namespace graphics
 		ThumbnailRenderer();
 		~ThumbnailRenderer();
 
-		void Process(ThumbnailRendererTask &task);
+		common::Task::Status Process(ThumbnailRendererTask &task);
 	};
 }

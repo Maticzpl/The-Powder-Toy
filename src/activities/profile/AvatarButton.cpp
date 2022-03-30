@@ -31,8 +31,8 @@ namespace activities::profile
 			}
 			else
 			{
-				Text(String::Build(gui::CommonColorString(gui::commonYellow), getImage->shortError));
-				ToolTip(std::make_shared<gui::ToolTipInfo>(gui::ToolTipInfo{ getImage->error, { 0, 0 }, true }));
+				Text(String::Build(gui::CommonColorString(gui::commonYellow), getImage->status.shortError));
+				ToolTip(std::make_shared<gui::ToolTipInfo>(gui::ToolTipInfo{ getImage->status.error, { 0, 0 }, true }));
 			}
 			getImage.reset();
 		}

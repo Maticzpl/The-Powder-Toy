@@ -7,7 +7,7 @@ namespace backend
 {
 	class PublishSave : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		PublishSave(String id);

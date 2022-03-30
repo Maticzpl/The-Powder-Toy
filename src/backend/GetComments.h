@@ -11,7 +11,7 @@ namespace backend
 {
 	class GetComments : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		std::vector<CommentInfo> comments;

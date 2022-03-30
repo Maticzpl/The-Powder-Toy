@@ -26,7 +26,7 @@ namespace backend
 		b.AddAuthHeaders(*request);
 	}
 
-	bool DeleteSave::Process()
+	common::Task::Status DeleteSave::Process()
 	{
 		return PreprocessResponse(responseCheckJson);
 	}

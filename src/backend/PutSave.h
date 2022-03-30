@@ -10,7 +10,7 @@ namespace backend
 {
 	class PutSave : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		String id;

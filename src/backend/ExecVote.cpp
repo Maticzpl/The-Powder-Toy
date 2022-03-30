@@ -16,7 +16,7 @@ namespace backend
 		b.AddAuthHeaders(*request);
 	}
 
-	bool ExecVote::Process()
+	common::Task::Status ExecVote::Process()
 	{
 		return PreprocessResponse(responseCheckOk);
 	}

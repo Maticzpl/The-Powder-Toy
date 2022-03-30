@@ -18,7 +18,7 @@ namespace backend
 		b.AddAuthHeaders(*request);
 	}
 
-	bool PublishSave::Process()
+	common::Task::Status PublishSave::Process()
 	{
 		return PreprocessResponse(responseCheckJson);
 	}

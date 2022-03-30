@@ -8,7 +8,7 @@ namespace backend
 {
 	class GetPTI : public BackendTask
 	{
-		bool Process() final override;
+		common::Task::Status Process() final override;
 
 	public:
 		gui::Image image;

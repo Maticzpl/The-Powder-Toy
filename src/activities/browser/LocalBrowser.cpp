@@ -31,14 +31,13 @@ namespace activities::browser
 		const Path path;
 
 	private:
-		void Process() final override
+		common::Task::Status Process() final override
 		{
 			auto saveData = Platform::ReadFile(String(path).ToUtf8());
 			if (!saveData.size())
 			{
-				error = "failed to open file";
-				status = false;
-				return;
+				// * TODO-REDO_UI: Do something with this.
+				return { false, "failed to open save", "" };
 			}
 			try
 			{
@@ -48,11 +47,9 @@ namespace activities::browser
 			}
 			catch (const ParseException &e)
 			{
-				error = ByteString(e.what()).FromUtf8();
-				status = false;
-				return;
+				return { false, "failed to load save", ByteString(e.what()).FromUtf8() };
 			}
-			status = true;
+			return { true };
 		}
 
 	public:
@@ -69,7 +66,7 @@ namespace activities::browser
 	{
 		const Path path;
 
-		void Process() final override
+		common::Task::Status Process() final override
 		{
 			auto extension = String(".cps");
 			for (auto &name : Platform::DirectorySearch(String(path).ToUtf8(), "", {}))
@@ -95,7 +92,7 @@ namespace activities::browser
 				if (lhs.displayName != rhs.displayName) return lhs.displayName < rhs.displayName;
 				return false;
 			});
-			status = true;
+			return { true };
 		}
 
 	public:
@@ -224,7 +221,7 @@ namespace activities::browser
 		else
 		{
 			errorStatic->Visible(true);
-			errorStatic->Text(String::Build("DEFAULT_LS_LOCALBROWSER_SAVELIST_ERROR"_Ls(), searchSaves->error));
+			errorStatic->Text(String::Build("DEFAULT_LS_LOCALBROWSER_SAVELIST_ERROR"_Ls(), searchSaves->status.error));
 			pagination->PageMax(0);
 		}
 		searchSaves.reset();

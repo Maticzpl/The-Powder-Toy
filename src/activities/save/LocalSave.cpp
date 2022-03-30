@@ -26,22 +26,20 @@ namespace activities::save
 		const Path path;
 		std::shared_ptr<const GameSave> save;
 
-		void Process() final override
+		common::Task::Status Process() final override
 		{
 			auto data = save->Serialise();
 			if (!data.size())
 			{
 				// * TODO-REDO_UI: Do something with this.
-				status = false;
-				return;
+				return { false, "failed to serialize save", "" };
 			}
 			if (!Platform::WriteFile(data, String(path).ToUtf8()))
 			{
 				// * TODO-REDO_UI: Do something with this.
-				status = false;
-				return;
+				return { false, "failed to write save", "" };
 			}
-			status = true;
+			return { true };
 		}
 
 	public:
