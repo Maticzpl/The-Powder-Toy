@@ -111,7 +111,7 @@ namespace backend
 
 	void Backend::Dispatch(std::shared_ptr<BackendTask> task)
 	{
-		tasks.push_back(std::weak_ptr(task));
+		tasks.push_back(std::weak_ptr<BackendTask>(task));
 		task->request->Dispatch();
 	}
 }

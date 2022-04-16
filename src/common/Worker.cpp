@@ -55,7 +55,7 @@ namespace common
 	{
 		{
 			std::unique_lock<std::mutex> ul(workerMx);
-			workerQu.push(std::weak_ptr(task));
+			workerQu.push(std::weak_ptr<WorkerTask>(task));
 		}
 		workerCv.notify_one();
 	}

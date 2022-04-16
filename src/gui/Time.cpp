@@ -10,7 +10,11 @@ namespace gui
 {
 namespace Time
 {
+	// time_t can be 32-bit on android >_> Not a problem on ndk r24 but apparently a problem on r21.
+	// No matter, android evolves too quickly for this to matter in 2038.
+#if !defined(AND)
 	static_assert(sizeof(time_t) >= sizeof(int64_t), "get a real OS");
+#endif
 
 	time_t Now()
 	{
@@ -20,7 +24,7 @@ namespace Time
 	struct tm LocalTime(time_t time)
 	{
 		struct tm ltm;
-#if (_POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE) || defined(MACOSX)
+#if (_POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE) || defined(MACOSX) || defined(AND)
 		localtime_r(&time, &ltm);
 #elif defined(WIN)
 		// * The functions in this family are actually thread-safe on windows (including mingw), huh:

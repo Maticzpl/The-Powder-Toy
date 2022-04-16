@@ -47,15 +47,15 @@ Path Path::FromString(const String &str)
 	Path path;
 	auto rootEndsAt = 0;
 #ifdef WIN
-	if (str.size() >= 2 && str[1] == ':' && ((str[0] >= 'A' && str[0] <= 'Z') || (str[0] >= 'a' && str[0] <= 'z')))
+	if (int(str.size()) >= 2 && str[1] == ':' && ((str[0] >= 'A' && str[0] <= 'Z') || (str[0] >= 'a' && str[0] <= 'z')))
 	{
 		rootEndsAt = 2;
 		path.root = str.Substr(0, rootEndsAt);
 	}
-	if (str.size() >= 3 && str[0] == '\\' && str[1] == '\\')
+	if (int(str.size()) >= 3 && str[0] == '\\' && str[1] == '\\')
 	{
 		rootEndsAt = 3;
-		while (rootEndsAt < str.size() && str[rootEndsAt] != '\\')
+		while (rootEndsAt < int(str.size()) && str[rootEndsAt] != '\\')
 		{
 			rootEndsAt += 1;
 		}

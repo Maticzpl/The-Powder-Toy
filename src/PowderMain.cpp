@@ -9,6 +9,7 @@
 #include "language/Language.h"
 #include "common/Worker.h"
 
+#include <SDL.h>
 #include <stdexcept>
 #include <iostream>
 #include <map>
@@ -250,10 +251,6 @@ static void frame()
 	sdlw.FrameDelay();
 	sdlw.FrameTime();
 }
-
-#ifdef main
-# undef main
-#endif
 
 int main(int argc, char *argv[])
 {

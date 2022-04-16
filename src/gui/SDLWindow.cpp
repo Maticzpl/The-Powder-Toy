@@ -190,6 +190,7 @@ namespace gui
 		SDL_SetWindowIcon(sdlWindow, iconSurface);
 		SDL_FreeSurface(iconSurface);
 		SDL_RaiseWindow(sdlWindow);
+		SDLASSERTTRUE(SDL_SetHintWithPriority(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1", SDL_HINT_NORMAL));
 		SDLASSERTZERO(SDL_SetRenderDrawBlendMode(sdlRenderer, SDL_BLENDMODE_BLEND));
 		SDLASSERTTRUE(SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, conf.blurry ? "1" : "0", SDL_HINT_NORMAL));
 		topLevelTexture = SDLASSERTPTR(SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, conf.size.x, conf.size.y));
@@ -458,7 +459,7 @@ namespace gui
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			mouseButtonsDown += sdlEvent.type == SDL_MOUSEBUTTONDOWN ? 1 : -1;
-#ifndef DEBUG
+#if !defined(AND) && !defined(DEBUG)
 			SDLASSERTZERO(SDL_CaptureMouse(mouseButtonsDown > 0 ? SDL_TRUE : SDL_FALSE));
 #endif
 			ev.type = sdlEvent.type == SDL_MOUSEBUTTONDOWN ? Event::MOUSEDOWN : Event::MOUSEUP;
@@ -1288,13 +1289,20 @@ namespace gui
 
 	void SDLWindow::BlueScreen(String details)
 	{
-		DrawRect({ { 0, 0 }, Configuration().size }, { 17, 114, 169, 210 });
 		StringBuilder sb;
 		sb << "ERROR\n\n";
 		sb << "Details: " << details << "\n\n";
 		sb << "An unrecoverable fault has occurred, please report the error by visiting the website below\n";
 		sb << SCHEME SERVER;
 		String message = sb.Build();
+#if defined(AND)
+		SDL_Log("%s\n", message.ToUtf8().c_str());
+		while (true)
+		{
+			SDL_Delay(20);
+		}
+#else
+		DrawRect({ { 0, 0 }, Configuration().size }, { 17, 114, 169, 210 });
 		DrawText((Configuration().size - TextSize(message)) / 2, message, { 255, 255, 255, 255 });
 		FrameEnd();
 		while (true)
@@ -1309,6 +1317,7 @@ namespace gui
 			}
 			SDL_Delay(20);
 		}
+#endif
 	}
 
 	void SDLWindow::AssertAllowed(uint32_t methodsToCheck)

@@ -72,7 +72,7 @@ ByteString ExecutableName()
 	ByteString ret;
 #if defined(WIN)
 	using Char = wchar_t;
-#elif defined(LIN)
+#else
 	using Char = char;
 #endif
 #if defined(WIN)
@@ -641,24 +641,3 @@ std::vector<char> ReadFile(ByteString path)
 }
 
 }
-
-#ifdef WIN
-# undef main // thank you sdl
-int main(int argc, char *argv[]);
-int WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
-{
-	int argc;
-	wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
-	std::vector<ByteString> argv;
-	for (auto i = 0; i < argc; ++i)
-	{
-		argv.push_back(Platform::WinNarrow(std::wstring(wargv[i])));
-	}
-	std::vector<char *> argp;
-	for (auto &arg : argv)
-	{
-		argp.push_back(&arg[0]);
-	}
-	return main(argc, &argp[0]);
-}
-#endif
