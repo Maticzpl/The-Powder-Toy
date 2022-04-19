@@ -504,6 +504,7 @@ namespace activities::game
 				});
 			}
 		}, "DEFAULT_LS_GAME_HORIZ_TAGS_TIP"_Ls()).get();
+		tagsButton->TextRect(tagsButton->TextRect().Grow({ -4, 0 }));
 
 		auto abvNextY = windowSize.y - 32;
 		auto addButtonVert = [this, &abvNextY](String text, gui::Button::ClickCallback cb) {
@@ -1574,7 +1575,6 @@ namespace activities::game
 			textBuilder << gui::CommonColorString(gui::commonLightGray) << "[" << "DEFAULT_LS_GAME_HORIZ_TAGS_EMPTY"_Ls() << "]";
 		}
 		tagsButton->Text(textBuilder.Build());
-		tagsButton->TextRect(tagsButton->TextRect().Grow({ -4, 0 }));
 	}
 
 	void Game::UpdateVoteControls()
@@ -3086,6 +3086,7 @@ namespace activities::game
 
 	void Game::LoadSave(std::shared_ptr<GameSave> save)
 	{
+		Paused(save->paused);
 		GravityMode(SimGravityMode(save->gravityMode));
 		AirMode(SimAirMode(save->airMode));
 		EdgeMode(SimEdgeMode(save->edgeMode));
