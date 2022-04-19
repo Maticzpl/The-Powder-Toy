@@ -146,7 +146,7 @@ namespace activities::toolsearch
 			}
 		};
 		auto pushIfMatches = [push, &queryLower](const String &identifier, game::tool::Tool *tool, const String &infoLower, int haystackRelevance) {
-			bool favourite = false; // * TODO-REDO_UI: favourites
+			bool favourite = game::Game::Ref().Favorite(identifier);
 			if (infoLower == queryLower)
 			{
 				push({ identifier, tool, favourite ? 0 : 1, haystackRelevance, 0, tool->Name() });
