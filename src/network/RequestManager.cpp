@@ -30,8 +30,8 @@ namespace network
 		"("
 			IDENT_PLATFORM "; "
 			IDENT_BUILD "; "
-			"M" MTOS(MOD_ID) //"; " // * TODO-REDO_UI: Re-enable once the
-			//IDENT //                                 server can handle it.
+			"M" MTOS(MOD_ID) "; "
+			IDENT
 		") "
 		"TPTPP/"
 		MTOS(SAVE_VERSION) "."
