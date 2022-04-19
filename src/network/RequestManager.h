@@ -2,13 +2,10 @@
 #include "Config.h"
 
 #include "common/ExplicitSingleton.h"
+#include "common/String.h"
 
-#ifndef NOHTTP
-# include <vector>
-# include <memory>
-#else
-# include "Request.h"
-#endif
+#include <vector>
+#include <memory>
 
 namespace network
 {
@@ -17,7 +14,9 @@ namespace network
 
 	class RequestManager : public common::ExplicitSingleton<RequestManager>
 	{
-#ifndef NOHTTP
+		bool disableNetwork = false;
+		ByteString proxy;
+		int timeout = 15;
 		void *opaque;
 		std::vector<std::unique_ptr<RequestInfo>> requests;
 
@@ -29,17 +28,32 @@ namespace network
 
 		void Add(Request *request);
 		void Remove(Request *request);
-#else
-	public:
-		void Add(Request *request)
+
+		void DisableNetwork(bool newDisableNetwork)
 		{
-			request->responseCode = 604;
-			request->status = Request::statusDone;
+			disableNetwork = newDisableNetwork;
+		}
+		bool DisableNetwork() const
+		{
+			return disableNetwork;
 		}
 
-		void Remove(Request *request)
+		void Proxy(ByteString newProxy)
 		{
+			proxy = newProxy;
 		}
-#endif
+		ByteString Proxy() const
+		{
+			return proxy;
+		}
+
+		void Timeout(int newTimeout)
+		{
+			timeout = newTimeout;
+		}
+		int Timeout() const
+		{
+			return timeout;
+		}
 	};
 }

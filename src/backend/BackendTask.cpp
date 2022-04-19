@@ -164,6 +164,7 @@ namespace backend
 		case 619: return "SSL: Failed to Load CRL File";
 		case 620: return "SSL: Issuer Check Failed";
 		case 621: return "SSL: Pinned Public Key Mismatch";
+		case 622: return "Network Disabled";
 		default: break;;
 		}
 		return "Unknown Status Code";

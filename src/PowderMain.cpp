@@ -240,9 +240,7 @@ static void frame()
 	{
 		return;
 	}
-#ifndef NOHTTP
 	network::RequestManager::Ref().Tick();
-#endif
 	backend::Backend::Ref().Tick();
 	backend::Startup::Ref().Tick();
 	sdlw.FrameTick();
@@ -280,7 +278,18 @@ int main(int argc, char *argv[])
 	prefs::GlobalPrefs gpref; // * Needs to happen after doDdir.
 	prefs::StampPrefs spref; // * Needs to happen after doDdir.
 	language::Language lang(gpref.Get("Language", String("en_US")));
+
+	auto disableNetwork = gpref.Get("DisableNetwork", false);
+	auto proxy = gpref.Get("Proxy", ByteString(""));
+	auto timeout = gpref.Get("NetworkTimeout", 15);
+	doDisableNetwork(arguments, disableNetwork);
+	doProxy(arguments, proxy);
+
 	network::RequestManager rm;
+	rm.DisableNetwork(disableNetwork);
+	rm.Proxy(proxy);
+	rm.Timeout(timeout);
+
 	backend::Backend be;
 	backend::Startup su;
 
@@ -303,12 +312,6 @@ int main(int argc, char *argv[])
 	// * TODO-REDO_UI: Replicate window position behaviour.
 	// * TODO-REDO_UI: Replicate draw limit behaviour.
 
-	ByteString proxy = gpref.Get("Proxy", ByteString(""));
-	bool disableNetwork = false;
-	doProxy(arguments, proxy);
-	doDisableNetwork(arguments, disableNetwork);
-
-	// cli.Initialise(proxy, disableNetwork); // * TODO-REDO_UI
 	
 	{
 		gui::SDLWindow sdlw(sdlwConf);

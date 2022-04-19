@@ -12,7 +12,6 @@ namespace network
 	{
 		bool post = false;
 		ByteString uri;
-		ByteString proxy;
 		ByteString responseBody;
 		int responseCode;
 		int total = 0;

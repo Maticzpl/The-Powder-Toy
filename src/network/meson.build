@@ -2,8 +2,12 @@ powder_files += files(
 	'Request.cpp',
 )
 
-if uopt_http
+if not uopt_http
 	powder_files += files(
-		'RequestManager.cpp',
+		'NullRequestManager.cpp',
+	)
+else
+	powder_files += files(
+		'CurlRequestManager.cpp',
 	)
 endif

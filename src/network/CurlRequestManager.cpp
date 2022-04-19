@@ -21,7 +21,6 @@
 namespace network
 {
 	constexpr long maxConnections = 6;
-	constexpr long timeout        = 15;
 
 	const char userAgent[] =
 		"PowderToy/"
@@ -220,6 +219,12 @@ namespace network
 
 	void RequestManager::Add(Request *request)
 	{
+		if (disableNetwork)
+		{
+			request->responseCode = 622;
+			request->status = Request::statusDone;
+			return;
+		}
 		auto *multi = reinterpret_cast<CURLM *>(opaque);
 		auto it = std::find_if(requests.begin(), requests.end(), [request](std::unique_ptr<RequestInfo> &ri) {
 			return ri->request == request;
@@ -298,12 +303,12 @@ namespace network
 			SetupCurlEasyCiphers(ri->easy);
 			CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_MAXREDIRS, 10L));
 			CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_ERRORBUFFER, &ri->errorBuffer[0]));
-			CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_CONNECTTIMEOUT, timeout));
+			CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_CONNECTTIMEOUT, long(timeout)));
 			CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_HTTPHEADER, ri->headers));
 			CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_URL, request->uri.c_str()));
-			if (request->proxy.size())
+			if (proxy.size())
 			{
-				CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_PROXY, request->proxy.c_str()));
+				CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_PROXY, proxy.c_str()));
 			}
 			CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_PRIVATE, (void *)request));
 			CURLEASSERTOK(curl_easy_setopt(ri->easy, CURLOPT_USERAGENT, userAgent));

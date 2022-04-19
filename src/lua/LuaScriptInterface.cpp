@@ -137,9 +137,9 @@ LuaScriptInterface::LuaScriptInterface(activities::game::Game *game):
 	initPlatformAPI();
 	initEventAPI();
 	initHttpAPI();
-#ifndef NOHTTP
-	initSocketAPI();
-#endif
+// #ifndef NOHTTP
+// 	initSocketAPI();
+// #endif
 
 	//Old TPT API
 	int currentElementMeta, currentElement;
@@ -4301,12 +4301,12 @@ LuaScriptInterface::~LuaScriptInterface() {
 	delete legacy;
 }
 
-#ifndef NOHTTP
-void LuaScriptInterface::initSocketAPI()
-{
-	LuaTCPSocket::Open(l);
-}
-#endif
+// #ifndef NOHTTP
+// void LuaScriptInterface::initSocketAPI()
+// {
+// 	LuaTCPSocket::Open(l);
+// }
+// #endif
 
 CommandInterface::CommandResult LuaScriptInterface::Execute(const String &command)
 {

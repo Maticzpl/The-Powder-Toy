@@ -5,7 +5,7 @@
 #mesondefine ZLIB_WINAPI
 
 #mesondefine LUACONSOLE
-#mesondefine NOHTTP
+//#mesondefine NOHTTP
 #mesondefine GRAVFFT
 #mesondefine RENDERER
 #mesondefine FONTEDITOR
